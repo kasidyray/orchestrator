@@ -1,0 +1,81 @@
+"use client"
+
+import { HugeiconsIcon } from "@hugeicons/react"
+
+import { Switch } from "@/components/ui/switch"
+import { cn } from "@/lib/utils"
+import type { KycRequirement } from "@/lib/constants"
+import type { RequirementState } from "./kyc-types"
+import { requirementIcon } from "./kyc-meta"
+import { ProviderSelect } from "./provider-select"
+
+interface RequirementCardProps {
+  requirement: KycRequirement
+  state: RequirementState
+  onToggle: (on: boolean) => void
+  onProviderChange: (providerId: string) => void
+}
+
+export function RequirementCard({
+  requirement,
+  state,
+  onToggle,
+  onProviderChange,
+}: RequirementCardProps) {
+  const { on } = state
+  const icon = requirementIcon(requirement.id)
+
+  return (
+    <div
+      className={cn(
+        "rounded-xl border px-4 py-3.5 transition-colors duration-100",
+        on ? "border-input bg-muted/30" : "border-border bg-card"
+      )}
+    >
+      <div className="flex items-center gap-3.5">
+        <span
+          className={cn(
+            "flex size-9.5 shrink-0 items-center justify-center rounded-[10px] transition-colors",
+            on ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"
+          )}
+        >
+          <HugeiconsIcon icon={icon} className="size-4.5" />
+        </span>
+        <span className="min-w-0 flex-1">
+          <span className="block text-sm font-semibold text-foreground">
+            {requirement.label}
+          </span>
+          <span className="mt-0.5 block text-xs text-muted-foreground">
+            {requirement.description}
+          </span>
+        </span>
+        <Switch
+          checked={on}
+          onCheckedChange={onToggle}
+          aria-label={`Require ${requirement.label}`}
+        />
+      </div>
+
+      {/* grid-rows trick: animates height + opacity, 200ms, like an accordion */}
+      <div
+        className={cn(
+          "grid transition-all duration-200 ease-out motion-reduce:transition-none",
+          on ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"
+        )}
+      >
+        <div className="overflow-hidden">
+          <div className="mt-3.5 flex items-center justify-between gap-3 border-t border-border pt-3.5">
+            <span className="text-xs font-semibold text-muted-foreground">
+              Verification provider
+            </span>
+            <ProviderSelect
+              options={requirement.providers}
+              value={state.provider}
+              onChange={onProviderChange}
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}

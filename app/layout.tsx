@@ -1,13 +1,14 @@
-import { Geist, Geist_Mono, Instrument_Sans } from "next/font/google"
+import { IBM_Plex_Mono, Instrument_Sans } from "next/font/google"
 
 import "./globals.css"
-import { ThemeProvider } from "@/components/theme-provider"
-import { cn } from "@/lib/utils";
+import { Providers } from "@/providers"
+import { cn } from "@/lib/utils"
 
 const instrumentSans = Instrument_Sans({subsets:['latin'],variable:'--font-sans'})
 
-const fontMono = Geist_Mono({
+const fontMono = IBM_Plex_Mono({
   subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
   variable: "--font-mono",
 })
 
@@ -23,7 +24,7 @@ export default function RootLayout({
       className={cn("antialiased", fontMono.variable, "font-sans", instrumentSans.variable)}
     >
       <body>
-        <ThemeProvider>{children}</ThemeProvider>
+        <Providers>{children}</Providers>
       </body>
     </html>
   )

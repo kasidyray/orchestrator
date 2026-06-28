@@ -20,6 +20,18 @@
     --color-chart-3: var(--chart-3);
     --color-chart-2: var(--chart-2);
     --color-chart-1: var(--chart-1);
+    --color-success: var(--success);
+    --color-success-foreground: var(--success-foreground);
+    --color-warning: var(--warning);
+    --color-warning-foreground: var(--warning-foreground);
+    --color-info: var(--info);
+    --color-info-foreground: var(--info-foreground);
+    --color-env-sandbox: var(--env-sandbox);
+    --color-env-sandbox-foreground: var(--env-sandbox-foreground);
+    --color-env-live: var(--env-live);
+    --color-env-live-foreground: var(--env-live-foreground);
+    --color-env-live-locked: var(--env-live-locked);
+    --color-env-live-locked-foreground: var(--env-live-locked-foreground);
     --color-ring: var(--ring);
     --color-input: var(--input);
     --color-border: var(--border);
@@ -48,8 +60,6 @@
 }
 
 :root {
-    --background: oklch(1 0 0);
-    --foreground: oklch(0.141 0.005 285.823);
     --card: oklch(1 0 0);
     --card-foreground: oklch(0.141 0.005 285.823);
     --popover: oklch(1 0 0);
@@ -80,6 +90,20 @@
     --sidebar-accent-foreground: oklch(0.21 0.006 285.885);
     --sidebar-border: oklch(0.92 0.004 286.32);
     --sidebar-ring: oklch(0.705 0.015 286.067);
+    --background: oklch(1 0 0);
+    --foreground: oklch(0.141 0.005 285.823);
+    --success: oklch(0.62 0.17 150);
+    --success-foreground: oklch(0.985 0 0);
+    --warning: oklch(0.75 0.15 80);
+    --warning-foreground: oklch(0.21 0.006 285.885);
+    --info: oklch(0.62 0.18 250);
+    --info-foreground: oklch(0.985 0 0);
+    --env-sandbox: oklch(0.55 0.22 300);
+    --env-sandbox-foreground: oklch(0.985 0 0);
+    --env-live: oklch(0.6 0.17 150);
+    --env-live-foreground: oklch(0.985 0 0);
+    --env-live-locked: oklch(0.7 0.01 285);
+    --env-live-locked-foreground: oklch(0.21 0.006 285.885);
 }
 
 .dark {
@@ -114,6 +138,18 @@
     --sidebar-accent-foreground: oklch(0.985 0 0);
     --sidebar-border: oklch(1 0 0 / 10%);
     --sidebar-ring: oklch(0.552 0.016 285.938);
+    --success: oklch(0.7 0.16 150);
+    --success-foreground: oklch(0.141 0.005 285.823);
+    --warning: oklch(0.8 0.15 80);
+    --warning-foreground: oklch(0.141 0.005 285.823);
+    --info: oklch(0.7 0.16 250);
+    --info-foreground: oklch(0.141 0.005 285.823);
+    --env-sandbox: oklch(0.65 0.2 300);
+    --env-sandbox-foreground: oklch(0.141 0.005 285.823);
+    --env-live: oklch(0.7 0.16 150);
+    --env-live-foreground: oklch(0.141 0.005 285.823);
+    --env-live-locked: oklch(0.55 0.01 285);
+    --env-live-locked-foreground: oklch(0.985 0 0);
 }
 
 @layer base {
