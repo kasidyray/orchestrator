@@ -1,58 +1,25 @@
 "use client"
 
 import * as React from "react"
-import { HugeiconsIcon } from "@hugeicons/react"
-import { Tick02Icon } from "@hugeicons/core-free-icons"
+import { useRouter } from "next/navigation"
 import { toast } from "sonner"
 
 import { Button } from "@/components/ui/button"
 import { Spinner } from "@/components/shared/spinner"
-import {
-  KYC_REQUIREMENT_CATALOG,
-  KYC_SETUP_TIER_DEFAULTS,
-  type KycTierDefault,
-} from "@/lib/constants"
-import { TierRail } from "./tier-rail"
-import { TierDetail } from "./tier-detail"
-import type { KycTierState, RequirementState } from "./kyc-types"
-
-function buildReqs(
-  enabled: Record<string, string>
-): Record<string, RequirementState> {
-  const reqs: Record<string, RequirementState> = {}
-  for (const req of KYC_REQUIREMENT_CATALOG) {
-    reqs[req.id] = {
-      on: Boolean(enabled[req.id]),
-      provider: enabled[req.id] ?? null,
-    }
-  }
-  return reqs
-}
-
-function buildInitialTiers(): KycTierState[] {
-  return KYC_SETUP_TIER_DEFAULTS.map((tier: KycTierDefault, index) => ({
-    id: `tier-${index + 1}`,
-    name: tier.name,
-    daily: tier.daily,
-    balance: tier.balance,
-    reqs: buildReqs(tier.enabled),
-  }))
-}
+import { KYC_REQUIREMENT_CATALOG } from "@/lib/constants"
+import { TierRail } from "@/components/features/kyc/tier-rail"
+import { TierDetail } from "@/components/features/kyc/tier-detail"
+import { buildReqs, buildInitialTiers } from "@/components/features/kyc/kyc-state"
+import type { KycTierState } from "@/components/features/kyc/kyc-types"
+import { useAppStore } from "@/store"
 
 export function KycConfig() {
   const [tiers, setTiers] = React.useState<KycTierState[]>(buildInitialTiers)
   const [selectedId, setSelectedId] = React.useState(() => tiers[0]?.id ?? "")
   const [saving, setSaving] = React.useState(false)
-  const [saved, setSaved] = React.useState(false)
   const seqRef = React.useRef(tiers.length)
-  const savedTimer = React.useRef<ReturnType<typeof setTimeout> | null>(null)
-
-  React.useEffect(
-    () => () => {
-      if (savedTimer.current) clearTimeout(savedTimer.current)
-    },
-    []
-  )
+  const router = useRouter()
+  const setSetupStep = useAppStore((state) => state.setSetupStep)
 
   const selectedIndex = Math.max(
     0,
@@ -130,10 +97,9 @@ export function KycConfig() {
       )
       return
     }
-    setSaved(true)
+    setSetupStep("kyc", true)
     toast.success("KYC configuration saved")
-    if (savedTimer.current) clearTimeout(savedTimer.current)
-    savedTimer.current = setTimeout(() => setSaved(false), 2000)
+    router.push("/dashboard")
   }
 
   if (!selectedTier) return null
@@ -190,10 +156,6 @@ export function KycConfig() {
             {saving ? (
               <>
                 <Spinner /> Saving…
-              </>
-            ) : saved ? (
-              <>
-                <HugeiconsIcon icon={Tick02Icon} className="size-4" /> Saved
               </>
             ) : (
               "Save changes"

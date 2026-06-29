@@ -1,5 +1,6 @@
 "use client"
 
+import * as React from "react"
 import Link from "next/link"
 import { HugeiconsIcon } from "@hugeicons/react"
 import { ArrowRight01Icon, Tick02Icon } from "@hugeicons/core-free-icons"
@@ -9,6 +10,8 @@ import {
   useSetupProgress,
   type SetupStepState,
 } from "@/hooks/use-setup-progress"
+import { CreateWebhookDialog } from "@/components/features/setup/webhooks/create-webhook-dialog"
+import { CreateApiKeyDialog } from "@/components/features/setup/api-keys/create-api-key-dialog"
 import { cn } from "@/lib/utils"
 
 /**
@@ -18,8 +21,10 @@ import { cn } from "@/lib/utils"
  * so the sidebar mini-progress advances in lockstep.
  */
 export function SetupChecklist() {
-  const { steps } = useSetupProgress()
+  const { steps, setSetupStep } = useSetupProgress()
   const nextIndex = steps.findIndex((step) => !step.completed)
+  const [webhookOpen, setWebhookOpen] = React.useState(false)
+  const [apiKeyOpen, setApiKeyOpen] = React.useState(false)
 
   return (
     <div className="mx-auto w-full max-w-2xl pt-2 sm:pt-8">
@@ -39,9 +44,29 @@ export function SetupChecklist() {
             step={step}
             number={index + 1}
             isNext={index === nextIndex}
+            // Webhooks and API keys are created in a modal rather than their
+            // own pages.
+            onAction={
+              step.id === "webhooks"
+                ? () => setWebhookOpen(true)
+                : step.id === "api-keys"
+                  ? () => setApiKeyOpen(true)
+                  : undefined
+            }
           />
         ))}
       </ol>
+
+      <CreateWebhookDialog
+        open={webhookOpen}
+        onOpenChange={setWebhookOpen}
+        onCreated={() => setSetupStep("webhooks", true)}
+      />
+      <CreateApiKeyDialog
+        open={apiKeyOpen}
+        onOpenChange={setApiKeyOpen}
+        onCreated={() => setSetupStep("api-keys", true)}
+      />
     </div>
   )
 }
@@ -50,11 +75,18 @@ function StepRow({
   step,
   number,
   isNext,
+  onAction,
 }: {
   step: SetupStepState
   number: number
   isNext: boolean
+  /** When set, the action opens this handler instead of navigating to href. */
+  onAction?: () => void
 }) {
+  const actionProps = onAction
+    ? { onClick: onAction }
+    : { render: <Link href={step.href} />, nativeButton: false as const }
+
   return (
     <li
       className={cn(
@@ -95,12 +127,7 @@ function StepRow({
           <HugeiconsIcon icon={Tick02Icon} className="size-4" strokeWidth={3} />
         </span>
       ) : isNext ? (
-        <Button
-          size="sm"
-          className="shrink-0"
-          render={<Link href={step.href} />}
-          nativeButton={false}
-        >
+        <Button size="sm" className="shrink-0" {...actionProps}>
           {step.actionLabel}
           <HugeiconsIcon icon={ArrowRight01Icon} className="size-4" />
         </Button>
@@ -108,8 +135,7 @@ function StepRow({
         <Button
           size="sm"
           className="shrink-0 bg-primary/10 text-primary shadow-none hover:bg-primary/20"
-          render={<Link href={step.href} />}
-          nativeButton={false}
+          {...actionProps}
         >
           {step.actionLabel}
         </Button>

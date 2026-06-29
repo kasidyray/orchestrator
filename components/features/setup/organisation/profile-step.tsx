@@ -1,13 +1,7 @@
 import { Input } from "@/components/ui/input"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
 import { FormField } from "@/components/shared/form-field"
-import { COUNTRY_OPTIONS, INDUSTRY_OPTIONS } from "@/lib/constants"
+import { ComboField } from "@/components/shared/combo-field"
+import { INDUSTRY_OPTIONS } from "@/lib/constants"
 import type {
   OrgProfileErrors,
   OrgProfileField,
@@ -32,89 +26,59 @@ export function ProfileStep({ values, errors, onChange }: ProfileStepProps) {
         />
       </FormField>
 
-      <FormField id="org-rc" label="RC number" error={errors.rcNumber}>
-        <Input
-          id="org-rc"
-          value={values.rcNumber}
-          onChange={(event) => onChange("rcNumber", event.target.value)}
-          aria-invalid={Boolean(errors.rcNumber)}
-        />
-      </FormField>
-
       <div className="grid gap-5 sm:grid-cols-2">
-        <FormField id="org-industry" label="Industry">
-          <Select
-            value={values.industry}
-            onValueChange={(value) => onChange("industry", value ?? "")}
-          >
-            <SelectTrigger id="org-industry" className="w-full">
-              <SelectValue placeholder="Select an industry" />
-            </SelectTrigger>
-            <SelectContent>
-              {INDUSTRY_OPTIONS.map((option) => (
-                <SelectItem key={option} value={option}>
-                  {option}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+        <FormField id="org-rc" label="RC number" error={errors.rcNumber}>
+          <Input
+            id="org-rc"
+            value={values.rcNumber}
+            onChange={(event) => onChange("rcNumber", event.target.value)}
+            aria-invalid={Boolean(errors.rcNumber)}
+          />
         </FormField>
 
-        <FormField id="org-country" label="Country of incorporation">
-          <Select
-            value={values.country}
-            onValueChange={(value) => onChange("country", value ?? "")}
-          >
-            <SelectTrigger id="org-country" className="w-full">
-              <SelectValue placeholder="Select a country" />
-            </SelectTrigger>
-            <SelectContent>
-              {COUNTRY_OPTIONS.map((option) => (
-                <SelectItem key={option} value={option}>
-                  {option}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+        <FormField id="org-industry" label="Industry">
+          <ComboField
+            id="org-industry"
+            options={INDUSTRY_OPTIONS}
+            value={values.industry}
+            onChange={(value) => onChange("industry", value)}
+            placeholder="Search industry…"
+          />
         </FormField>
       </div>
 
-      <FormField id="org-email" label="Business email" error={errors.email}>
-        <Input
-          id="org-email"
-          type="email"
-          value={values.email}
-          onChange={(event) => onChange("email", event.target.value)}
-          aria-invalid={Boolean(errors.email)}
-        />
-      </FormField>
+      <div className="grid gap-5 sm:grid-cols-2">
+        <FormField id="org-email" label="Business email" error={errors.email}>
+          <Input
+            id="org-email"
+            type="email"
+            value={values.email}
+            onChange={(event) => onChange("email", event.target.value)}
+            aria-invalid={Boolean(errors.email)}
+          />
+        </FormField>
 
-      <FormField
-        id="org-phone"
-        label="Phone number"
-        error={errors.phone}
-        hint="Include the country code, e.g. +234"
-      >
-        <Input
+        <FormField
           id="org-phone"
-          value={values.phone}
-          onChange={(event) => onChange("phone", event.target.value)}
-          aria-invalid={Boolean(errors.phone)}
-        />
-      </FormField>
-
-      <FormField
-        id="org-address"
-        label="Registered address"
-        error={errors.address}
-      >
-        <Input
-          id="org-address"
-          value={values.address}
-          onChange={(event) => onChange("address", event.target.value)}
-          aria-invalid={Boolean(errors.address)}
-        />
-      </FormField>
+          label="Phone number"
+          error={errors.phone}
+          hint="e.g. 809 442 1180"
+        >
+          <div className="relative">
+            <span className="pointer-events-none absolute inset-y-0 left-0 flex w-12 items-center justify-center border-r border-input text-sm text-muted-foreground">
+              +234
+            </span>
+            <Input
+              id="org-phone"
+              type="tel"
+              value={values.phone}
+              onChange={(event) => onChange("phone", event.target.value)}
+              className="pl-14"
+              aria-invalid={Boolean(errors.phone)}
+            />
+          </div>
+        </FormField>
+      </div>
     </div>
   )
 }

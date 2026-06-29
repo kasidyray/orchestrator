@@ -75,6 +75,8 @@ function seedAuditLogs(user: TeamMember): AuditLog[] {
 export function useDataset(): Dataset {
   const hasSampleData = useAppStore((state) => state.hasSampleData)
   const currentUser = useAppStore((state) => state.currentUser)
+  // Config changes made this session show up at the top of the audit trail.
+  const activityLog = useAppStore((state) => state.activityLog)
 
   if (hasSampleData) {
     return {
@@ -83,7 +85,7 @@ export function useDataset(): Dataset {
       wallets: mockWallets,
       apiKeys: mockApiKeys,
       webhookLogs: mockWebhookLogs,
-      auditLogs: mockAuditLogs,
+      auditLogs: [...activityLog, ...mockAuditLogs],
       teamMembers: mockTeamMembers,
       hasSampleData: true,
     }
@@ -95,7 +97,10 @@ export function useDataset(): Dataset {
     wallets: [],
     apiKeys: [],
     webhookLogs: [],
-    auditLogs: currentUser ? seedAuditLogs(currentUser) : [],
+    auditLogs: [
+      ...activityLog,
+      ...(currentUser ? seedAuditLogs(currentUser) : []),
+    ],
     teamMembers: currentUser ? [currentUser] : [],
     hasSampleData: false,
   }

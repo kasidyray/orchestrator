@@ -6,7 +6,7 @@ export default function WalletSetupPage() {
     <div className="mx-auto flex w-full max-w-5xl flex-col gap-8 px-4 py-8 md:py-12">
       <PageHeader
         title="Wallet products"
-        description="Choose the wallets your customers can hold, rename them, and set a default."
+        description="Choose the wallets your customers can hold and rename them to match your brand."
       />
       <WalletCatalog />
     </div>

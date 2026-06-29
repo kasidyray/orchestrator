@@ -9,6 +9,7 @@ import {
 } from "@/components/features/dashboard/metric-stat"
 import { RecentActivity } from "@/components/features/dashboard/recent-activity"
 import { SetupChecklist } from "@/components/features/dashboard/setup-checklist"
+import { GoLiveHero } from "@/components/features/dashboard/go-live-hero"
 import { VolumeChartCard } from "@/components/features/dashboard/volume-chart-card"
 import { DashboardSkeleton } from "@/components/features/dashboard/dashboard-skeleton"
 import { useSession } from "@/hooks/use-session"
@@ -106,6 +107,8 @@ export function DashboardContent({
 
   return (
     <div className="flex flex-col gap-8">
+      <GoLiveHero />
+
       <PageHeader
         title={`Welcome back, ${firstName}`}
         description={`Here's what's happening with ${orgName} today.`}

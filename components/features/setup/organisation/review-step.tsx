@@ -5,45 +5,71 @@ import {
 } from "@hugeicons/core-free-icons"
 
 import { SectionCard } from "@/components/shared/section-card"
-import { ORGANISATION_DOCUMENTS } from "@/lib/constants"
-import { cn } from "@/lib/utils"
+import { ORGANISATION_DOCUMENTS, ORG_ROLE_OPTIONS } from "@/lib/constants"
+import { cn, formatDate } from "@/lib/utils"
 import type {
   OrgDocuments,
   OrgProfileValues,
+  OrgRole,
 } from "@/components/features/setup/organisation/types"
 
 interface ReviewStepProps {
   values: OrgProfileValues
+  roles: OrgRole[]
   documents: OrgDocuments
 }
 
-const PROFILE_FIELDS: { label: string; key: keyof OrgProfileValues }[] = [
-  { label: "Legal business name", key: "name" },
-  { label: "RC number", key: "rcNumber" },
-  { label: "Industry", key: "industry" },
-  { label: "Country", key: "country" },
-  { label: "Business email", key: "email" },
-  { label: "Phone number", key: "phone" },
-  { label: "Registered address", key: "address" },
-]
+type Row = { label: string; value: string }
 
-export function ReviewStep({ values, documents }: ReviewStepProps) {
+export function ReviewStep({ values, roles, documents }: ReviewStepProps) {
+  const businessRows: Row[] = [
+    { label: "Legal business name", value: values.name },
+    { label: "RC number", value: values.rcNumber },
+    { label: "Industry", value: values.industry },
+    { label: "Business email", value: values.email },
+    { label: "Phone number", value: values.phone ? `+234 ${values.phone}` : "" },
+  ]
+
+  const addressRows: Row[] = [
+    { label: "Address", value: values.address },
+    { label: "State", value: values.state },
+    { label: "Country", value: values.country },
+  ]
+
+  const roleLabels = ORG_ROLE_OPTIONS.filter((role) =>
+    roles.includes(role.id)
+  )
+    .map((role) => role.label)
+    .join(", ")
+
+  const representativeRows: Row[] = [
+    {
+      label: "Legal name",
+      value: [values.repFirstName, values.repLastName]
+        .filter(Boolean)
+        .join(" "),
+    },
+    {
+      label: "Date of birth",
+      value: values.repDob ? formatDate(values.repDob) : "",
+    },
+    { label: "Nationality", value: values.repNationality },
+    { label: "Role at the business", value: roleLabels },
+    { label: "BVN", value: values.bvn },
+  ]
+
   return (
     <div className="flex flex-col gap-5">
-      <SectionCard title="Organisation details">
-        <dl className="divide-y divide-border">
-          {PROFILE_FIELDS.map((field) => (
-            <div
-              key={field.key}
-              className="flex items-center justify-between gap-4 py-2.5"
-            >
-              <dt className="text-sm text-muted-foreground">{field.label}</dt>
-              <dd className="min-w-0 truncate text-right text-sm font-medium text-foreground">
-                {values[field.key] || "—"}
-              </dd>
-            </div>
-          ))}
-        </dl>
+      <SectionCard title="Business details">
+        <DefinitionList rows={businessRows} />
+      </SectionCard>
+
+      <SectionCard title="Registered address">
+        <DefinitionList rows={addressRows} />
+      </SectionCard>
+
+      <SectionCard title="Business representative">
+        <DefinitionList rows={representativeRows} />
       </SectionCard>
 
       <SectionCard title="Documents">
@@ -74,5 +100,23 @@ export function ReviewStep({ values, documents }: ReviewStepProps) {
         </ul>
       </SectionCard>
     </div>
+  )
+}
+
+function DefinitionList({ rows }: { rows: Row[] }) {
+  return (
+    <dl className="divide-y divide-border">
+      {rows.map((row) => (
+        <div
+          key={row.label}
+          className="flex items-center justify-between gap-4 py-2.5"
+        >
+          <dt className="text-sm text-muted-foreground">{row.label}</dt>
+          <dd className="min-w-0 truncate text-right text-sm font-medium text-foreground">
+            {row.value || "—"}
+          </dd>
+        </div>
+      ))}
+    </dl>
   )
 }

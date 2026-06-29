@@ -6,11 +6,19 @@ import {
 } from "zustand/middleware"
 
 import type {
+  AuditLog,
   EnvironmentMode,
   Organisation,
   SetupStepId,
   TeamMember,
 } from "@/lib/types"
+
+/** Fields a caller supplies when recording a config change to the audit trail. */
+export interface ActivityInput {
+  action: string
+  target: string
+  description: string
+}
 
 /** No-op storage so the persisted store is safe to import during SSR. */
 const noopStorage: StateStorage = {
@@ -58,6 +66,13 @@ interface AppState {
   setupCompletion: Record<SetupStepId, boolean>
   setSetupStep: (id: SetupStepId, completed: boolean) => void
 
+  /**
+   * Audit entries generated this session (e.g. configuration changes). Merged
+   * into the audit-log view by useDataset. Session-only — not persisted.
+   */
+  activityLog: AuditLog[]
+  logActivity: (entry: ActivityInput) => void
+
   environment: EnvironmentMode
   setEnvironment: (environment: EnvironmentMode) => void
 
@@ -91,6 +106,7 @@ export const useAppStore = create<AppState>()(
           hasSampleData: false,
           setupCompletion: EMPTY_SETUP_COMPLETION,
           environment: "sandbox",
+          activityLog: [],
         }),
 
       setupCompletion: EMPTY_SETUP_COMPLETION,
@@ -98,6 +114,27 @@ export const useAppStore = create<AppState>()(
         set((state) => ({
           setupCompletion: { ...state.setupCompletion, [id]: completed },
         })),
+
+      activityLog: [],
+      logActivity: ({ action, target, description }) =>
+        set((state) => {
+          const user = state.currentUser
+          if (!user) return {}
+          const entry: AuditLog = {
+            id: `aud_cfg_${Date.now().toString(36)}_${state.activityLog.length}`,
+            actor: {
+              name: user.name,
+              email: user.email,
+              avatarUrl: user.avatarUrl,
+            },
+            action,
+            target,
+            description,
+            ipAddress: "102.89.34.12",
+            createdAt: new Date().toISOString(),
+          }
+          return { activityLog: [entry, ...state.activityLog] }
+        }),
 
       environment: "sandbox",
       setEnvironment: (environment) => set({ environment }),

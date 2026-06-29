@@ -43,7 +43,7 @@ export function WizardShell({
         className="sticky top-16 z-20 rounded-none"
       />
 
-      <div className="grid flex-1 grid-cols-1 gap-y-10 px-4 py-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,40rem)_minmax(0,1fr)] lg:gap-x-10 lg:px-8 lg:py-14">
+      <div className="grid flex-1 grid-cols-1 gap-y-10 px-4 py-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,46rem)_minmax(0,1fr)] lg:gap-x-10 lg:px-8 lg:py-14">
         <aside className="lg:sticky lg:top-28 lg:self-start lg:justify-self-start lg:pl-4">
           <WizardStepRail
             steps={steps}

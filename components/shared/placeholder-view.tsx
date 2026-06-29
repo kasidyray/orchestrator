@@ -19,15 +19,14 @@ export function PlaceholderView({
   icon,
 }: PlaceholderViewProps) {
   return (
-    <PageContainer width="wide">
+    <PageContainer width="wide" className="flex-1">
       <PageHeader title={title} description={description} />
-      <div className="rounded-xl border border-border">
-        <EmptyState
-          icon={icon}
-          title="Coming up next"
-          description="This screen is built in an upcoming phase of the project."
-        />
-      </div>
+      <EmptyState
+        fullHeight
+        icon={icon}
+        title="Coming up next"
+        description="This screen is built in an upcoming phase of the project."
+      />
     </PageContainer>
   )
 }

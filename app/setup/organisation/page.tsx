@@ -9,9 +9,16 @@ export default function OrganisationSetupPage() {
         rcNumber: mockOrganisation.rcNumber,
         industry: mockOrganisation.industry,
         email: mockOrganisation.email,
-        phone: mockOrganisation.phone,
+        phone: mockOrganisation.phone.replace(/^\+234\s*/, ""),
         address: mockOrganisation.address,
+        state: "",
         country: mockOrganisation.country,
+        addressDocType: "",
+        repFirstName: "",
+        repLastName: "",
+        repDob: "",
+        repNationality: "",
+        bvn: "",
       }}
     />
   )

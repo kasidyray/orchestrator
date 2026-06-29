@@ -3,9 +3,9 @@
 import * as React from "react"
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import NextTopLoader from "nextjs-toploader"
-import { Toaster } from "sonner"
 
 import { ThemeProvider } from "@/components/theme-provider"
+import { Toaster } from "@/components/ui/sonner"
 
 export function Providers({ children }: { children: React.ReactNode }) {
   const [queryClient] = React.useState(
@@ -30,7 +30,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
           shadow={false}
         />
         {children}
-        <Toaster position="top-right" richColors closeButton duration={4000} />
+        <Toaster position="top-right" closeButton duration={4000} />
       </QueryClientProvider>
     </ThemeProvider>
   )

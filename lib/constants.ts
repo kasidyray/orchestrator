@@ -7,6 +7,7 @@ import {
   Key01Icon,
   LayoutGridIcon,
   SecurityCheckIcon,
+  Settings02Icon,
   SourceCodeIcon,
   UserMultipleIcon,
   Wallet01Icon,
@@ -57,6 +58,11 @@ export const MANAGE_GROUP: NavGroup = {
   label: "Manage",
   icon: LayoutGridIcon,
   children: [
+    {
+      label: "Configuration",
+      href: "/manage/configuration",
+      icon: Settings02Icon,
+    },
     { label: "Members", href: "/manage/members", icon: UserMultipleIcon },
     { label: "Webhooks", href: "/manage/webhooks", icon: WebhookIcon },
     { label: "Security", href: "/manage/security", icon: SecurityCheckIcon },
@@ -204,44 +210,17 @@ export const KYC_SETUP_TIER_DEFAULTS: KycTierDefault[] = [
 
 export const WALLET_PRODUCT_CATALOG: WalletProduct[] = [
   {
-    id: "wp_ngn_savings",
-    name: "NGN Savings",
+    id: "wp_ngn_wallet",
+    name: "Naira wallet",
     currency: "NGN",
-    type: "savings",
-    description: "Interest-bearing naira savings wallet for everyday customers.",
+    type: "current",
+    description: "Everyday naira balance for sending, receiving, and spending.",
     isActive: true,
     isDefault: true,
   },
   {
-    id: "wp_ngn_current",
-    name: "NGN Current",
-    currency: "NGN",
-    type: "current",
-    description: "Zero-interest current account for high-frequency transactions.",
-    isActive: true,
-    isDefault: false,
-  },
-  {
-    id: "wp_virtual_nuban",
-    name: "Virtual NUBAN",
-    currency: "NGN",
-    type: "virtual",
-    description: "Dedicated virtual account numbers for inbound collections.",
-    isActive: false,
-    isDefault: false,
-  },
-  {
-    id: "wp_collection",
-    name: "Collection Wallet",
-    currency: "NGN",
-    type: "collection",
-    description: "Pooled wallet for aggregating merchant settlements.",
-    isActive: false,
-    isDefault: false,
-  },
-  {
     id: "wp_usd_wallet",
-    name: "USD Wallet",
+    name: "USD wallet",
     currency: "USD",
     type: "current",
     description: "Hold and transact in US dollars for cross-border needs.",
@@ -249,29 +228,30 @@ export const WALLET_PRODUCT_CATALOG: WalletProduct[] = [
     isDefault: false,
   },
   {
-    id: "wp_escrow",
-    name: "Escrow Wallet",
-    currency: "NGN",
-    type: "escrow",
-    description: "Hold funds in trust until transaction conditions are met.",
-    isActive: false,
-    isDefault: false,
-  },
-  {
-    id: "wp_sub_wallet",
-    name: "Sub-Wallet",
+    id: "wp_flex_savings",
+    name: "Flexible savings",
     currency: "NGN",
     type: "savings",
-    description: "Child wallets nested under a parent for goal-based saving.",
+    description:
+      "Interest-bearing savings customers can top up or withdraw anytime.",
+    isActive: true,
+    isDefault: false,
+  },
+  {
+    id: "wp_fixed_savings",
+    name: "Fixed savings",
+    currency: "NGN",
+    type: "savings",
+    description: "Lock funds for a fixed term in exchange for a higher rate.",
     isActive: false,
     isDefault: false,
   },
   {
-    id: "wp_payout",
-    name: "Payout Wallet",
+    id: "wp_target_savings",
+    name: "Target savings",
     currency: "NGN",
-    type: "payout",
-    description: "Dedicated balance for disbursements and bulk payouts.",
+    type: "savings",
+    description: "Goal-based plans that help customers save toward a target.",
     isActive: false,
     isDefault: false,
   },
@@ -331,6 +311,83 @@ export const ORGANISATION_DOCUMENTS: RequiredDocument[] = [
     label: "Proof of business address",
     hint: "Utility bill issued within the last 3 months",
   },
+]
+
+/** Documents collected on the dedicated business-registration step. */
+export const REGISTRATION_DOCUMENTS: RequiredDocument[] = [
+  ORGANISATION_DOCUMENTS[0], // Certificate of incorporation
+  ORGANISATION_DOCUMENTS[1], // MEMART
+]
+
+/** Nigerian states plus the Federal Capital Territory, for the address step. */
+export const NIGERIA_STATES = [
+  "Abia",
+  "Adamawa",
+  "Akwa Ibom",
+  "Anambra",
+  "Bauchi",
+  "Bayelsa",
+  "Benue",
+  "Borno",
+  "Cross River",
+  "Delta",
+  "Ebonyi",
+  "Edo",
+  "Ekiti",
+  "Enugu",
+  "FCT — Abuja",
+  "Gombe",
+  "Imo",
+  "Jigawa",
+  "Kaduna",
+  "Kano",
+  "Katsina",
+  "Kebbi",
+  "Kogi",
+  "Kwara",
+  "Lagos",
+  "Nasarawa",
+  "Niger",
+  "Ogun",
+  "Ondo",
+  "Osun",
+  "Oyo",
+  "Plateau",
+  "Rivers",
+  "Sokoto",
+  "Taraba",
+  "Yobe",
+  "Zamfara",
+] as const
+
+/** Nationality options for the business representative. */
+export const NATIONALITY_OPTIONS = [
+  "Nigerian",
+  "Ghanaian",
+  "Kenyan",
+  "South African",
+  "Egyptian",
+  "Other",
+] as const
+
+/** Accepted proof-of-address document types. */
+export const ADDRESS_DOCUMENT_OPTIONS = [
+  "Utility bill",
+  "Bank statement",
+  "Tenancy agreement",
+  "Tax assessment notice",
+] as const
+
+export interface OrgRoleOption {
+  id: "owner" | "director" | "shareholder"
+  label: string
+}
+
+/** A representative's relationship to the business (multi-select). */
+export const ORG_ROLE_OPTIONS: OrgRoleOption[] = [
+  { id: "owner", label: "Owner" },
+  { id: "director", label: "Director" },
+  { id: "shareholder", label: "Shareholder" },
 ]
 
 /* -------------------------------------------------------------------------- */

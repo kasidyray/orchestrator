@@ -35,9 +35,9 @@ export function WizardStepRail({
   return (
     <nav
       aria-label="Setup steps"
-      className={cn("flex flex-col gap-6", className)}
+      className={cn("flex min-w-64 flex-col gap-6", className)}
     >
-      <p className="text-3xl font-semibold tracking-tight tabular-nums">
+      <p className="pl-3 text-3xl font-semibold tracking-tight tabular-nums">
         <span className="text-primary">{current + 1}</span>
         <span className="text-muted-foreground"> / {steps.length}</span>
       </p>
@@ -57,7 +57,7 @@ export function WizardStepRail({
                 onClick={interactive ? () => onStepSelect?.(index) : undefined}
                 aria-current={active ? "step" : undefined}
                 className={cn(
-                  "flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm font-medium transition-colors duration-150 outline-none focus-visible:ring-3 focus-visible:ring-ring/50 motion-reduce:transition-none",
+                  "flex w-full items-center gap-3 rounded-full px-3.5 py-2.5 text-left text-sm font-medium transition-colors duration-150 outline-none focus-visible:ring-3 focus-visible:ring-ring/50 motion-reduce:transition-none",
                   active && "bg-muted text-foreground",
                   !active && reachable && "text-foreground hover:bg-muted/60",
                   !reachable && "text-muted-foreground",
@@ -66,8 +66,8 @@ export function WizardStepRail({
               >
                 <span
                   className={cn(
-                    "flex size-7 shrink-0 items-center justify-center rounded-md border text-xs font-medium transition-colors duration-150 motion-reduce:transition-none",
-                    complete && "border-primary bg-primary text-primary-foreground",
+                    "flex size-7 shrink-0 items-center justify-center rounded-full border text-xs font-medium transition-colors duration-150 motion-reduce:transition-none",
+                    complete && "border-success bg-success text-success-foreground",
                     active && "border-primary text-primary",
                     !complete && !active && "border-border text-muted-foreground"
                   )}
