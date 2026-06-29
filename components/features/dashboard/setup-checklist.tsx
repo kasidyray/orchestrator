@@ -12,6 +12,7 @@ import {
 } from "@/hooks/use-setup-progress"
 import { CreateWebhookDialog } from "@/components/features/setup/webhooks/create-webhook-dialog"
 import { CreateApiKeyDialog } from "@/components/features/setup/api-keys/create-api-key-dialog"
+import { CelebrationIllustration } from "@/components/features/dashboard/celebration-illustration"
 import { cn } from "@/lib/utils"
 
 /**
@@ -29,8 +30,9 @@ export function SetupChecklist() {
   return (
     <div className="mx-auto w-full max-w-2xl pt-2 sm:pt-8">
       <div className="flex flex-col items-center gap-2 text-center">
+        <CelebrationIllustration className="mb-2 animate-float-soft" />
         <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-[28px]">
-          Congrats on your new account!
+          Let&apos;s get you set up.
         </h1>
         <p className="max-w-md text-[15px] leading-relaxed text-muted-foreground">
           Complete these steps to get your account up and running.

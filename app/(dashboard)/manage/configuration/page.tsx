@@ -8,12 +8,11 @@ import { PageHeader } from "@/components/shared/page-header"
 import { ConfigurationTabs } from "@/components/features/configuration/configuration-tabs"
 import { useDataset } from "@/hooks/use-dataset"
 import { useEnvironment } from "@/hooks/use-environment"
-import { ENV_CONFIG, WALLET_PRODUCT_CATALOG } from "@/lib/constants"
+import { WALLET_PRODUCT_CATALOG } from "@/lib/constants"
 
 export default function ConfigurationPage() {
   const { wallets } = useDataset()
   const { environment } = useEnvironment()
-  const env = ENV_CONFIG[environment]
   const isLive = environment === "live"
 
   return (
@@ -21,15 +20,6 @@ export default function ConfigurationPage() {
       <PageHeader
         title="Configuration"
         description="Manage the wallet products and verification policies your customers use."
-        actions={
-          <span
-            className={`inline-flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-medium ${env.badgeClass}`}
-            title={env.description}
-          >
-            <span className="size-1.5 rounded-full bg-current" aria-hidden />
-            {env.label}
-          </span>
-        }
       />
 
       {isLive ? (

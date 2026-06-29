@@ -32,6 +32,12 @@
     --color-env-live-foreground: var(--env-live-foreground);
     --color-env-live-locked: var(--env-live-locked);
     --color-env-live-locked-foreground: var(--env-live-locked-foreground);
+    --color-swatch-1: var(--swatch-1);
+    --color-swatch-2: var(--swatch-2);
+    --color-swatch-3: var(--swatch-3);
+    --color-swatch-4: var(--swatch-4);
+    --color-swatch-5: var(--swatch-5);
+    --color-swatch-6: var(--swatch-6);
     --color-ring: var(--ring);
     --color-input: var(--input);
     --color-border: var(--border);
@@ -104,6 +110,12 @@
     --env-live-foreground: oklch(0.985 0 0);
     --env-live-locked: oklch(0.7 0.01 285);
     --env-live-locked-foreground: oklch(0.21 0.006 285.885);
+    --swatch-1: oklch(0.55 0.18 255);
+    --swatch-2: oklch(0.55 0.22 300);
+    --swatch-3: oklch(0.64 0.16 65);
+    --swatch-4: oklch(0.58 0.1 210);
+    --swatch-5: oklch(0.6 0.16 150);
+    --swatch-6: oklch(0.6 0.2 10);
 }
 
 .dark {
@@ -122,8 +134,8 @@
     --accent: oklch(0.274 0.006 286.033);
     --accent-foreground: oklch(0.985 0 0);
     --destructive: oklch(0.704 0.191 22.216);
-    --border: oklch(1 0 0 / 10%);
-    --input: oklch(1 0 0 / 15%);
+    --border: oklch(1 0 0 / 7%);
+    --input: oklch(1 0 0 / 11%);
     --ring: oklch(0.552 0.016 285.938);
     --chart-1: oklch(0.809 0.105 251.813);
     --chart-2: oklch(0.623 0.214 259.815);
@@ -136,7 +148,7 @@
     --sidebar-primary-foreground: oklch(0.97 0.014 254.604);
     --sidebar-accent: oklch(0.274 0.006 286.033);
     --sidebar-accent-foreground: oklch(0.985 0 0);
-    --sidebar-border: oklch(1 0 0 / 10%);
+    --sidebar-border: oklch(1 0 0 / 7%);
     --sidebar-ring: oklch(0.552 0.016 285.938);
     --success: oklch(0.7 0.16 150);
     --success-foreground: oklch(0.141 0.005 285.823);
@@ -150,6 +162,12 @@
     --env-live-foreground: oklch(0.141 0.005 285.823);
     --env-live-locked: oklch(0.55 0.01 285);
     --env-live-locked-foreground: oklch(0.985 0 0);
+    --swatch-1: oklch(0.72 0.16 255);
+    --swatch-2: oklch(0.72 0.18 300);
+    --swatch-3: oklch(0.78 0.14 70);
+    --swatch-4: oklch(0.74 0.1 210);
+    --swatch-5: oklch(0.74 0.15 150);
+    --swatch-6: oklch(0.72 0.18 10);
 }
 
 @layer base {
@@ -165,4 +183,45 @@
   html {
     @apply font-sans;
     }
+}
+
+/* Soft vertical float for decorative illustrations. */
+@keyframes float-soft {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
+.animate-float-soft {
+  animation: float-soft 3.5s ease-in-out infinite;
+}
+
+/* Independent drift + twinkle for confetti, relative to the floating mark. */
+@keyframes sparkle-drift {
+  0%,
+  100% {
+    transform: translateY(0);
+    opacity: 0.9;
+  }
+  50% {
+    transform: translateY(-3px);
+    opacity: 0.45;
+  }
+}
+
+.animate-sparkle {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: sparkle-drift 2.8s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-float-soft,
+  .animate-sparkle {
+    animation: none;
+  }
 }

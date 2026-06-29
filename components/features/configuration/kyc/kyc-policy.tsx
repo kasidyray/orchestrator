@@ -1,41 +1,54 @@
 "use client"
 
 import * as React from "react"
+import { HugeiconsIcon } from "@hugeicons/react"
+import { Delete02Icon, PlusSignIcon } from "@hugeicons/core-free-icons"
 import { toast } from "sonner"
 
 import { Button } from "@/components/ui/button"
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/shared/table"
+import { TableSkeleton } from "@/components/shared/table-skeleton"
 import { Skeleton } from "@/components/ui/skeleton"
-import { SectionCard } from "@/components/shared/section-card"
-import { Spinner } from "@/components/shared/spinner"
-import { TierRail } from "@/components/features/kyc/tier-rail"
-import { TierDetail } from "@/components/features/kyc/tier-detail"
-import { ProvidersSummary } from "@/components/features/configuration/kyc/providers-summary"
+import { TierSheet } from "@/components/features/kyc/tier-sheet"
+import { TierCheckChips } from "@/components/features/kyc/tier-check-chips"
 import { ConfigProvenance } from "@/components/features/configuration/config-provenance"
 import {
   buildReqs,
   buildInitialTiers,
 } from "@/components/features/kyc/kyc-state"
 import { KYC_REQUIREMENT_CATALOG } from "@/lib/constants"
+import { formatNairaShort } from "@/lib/utils"
 import { useAppStore } from "@/store"
 import type { KycTierState } from "@/components/features/kyc/kyc-types"
 
 /** Seed provenance so the section reads as a living config, not a blank slate. */
 const SEED_LAST_CHANGED = "2024-06-19T16:45:00.000Z"
 
+function blankDraft(): KycTierState {
+  return { id: "", name: "", daily: 0, balance: 0, reqs: buildReqs({}) }
+}
+
 /**
- * KYC & identity policy management. Reuses the setup tier editor, reframed for
- * ongoing changes: edits stay on the page and persist via an explicit Save that
- * only lights up when there are unsaved changes.
+ * KYC & identity policy management. Lists the configured tiers in a table and
+ * edits each one in the shared tier sheet. Each add/edit/remove persists
+ * immediately — there's no batch save — and refreshes the "last updated" line.
  */
 export function KycPolicy() {
   const logActivity = useAppStore((state) => state.logActivity)
   const actorName = useAppStore((state) => state.currentUser?.name) ?? "You"
 
   const [tiers, setTiers] = React.useState<KycTierState[]>(buildInitialTiers)
-  const [selectedId, setSelectedId] = React.useState(() => tiers[0]?.id ?? "")
+  const [draft, setDraft] = React.useState<KycTierState>(blankDraft)
+  const [editingId, setEditingId] = React.useState<string | null>(null)
+  const [sheetOpen, setSheetOpen] = React.useState(false)
   const [loading, setLoading] = React.useState(true)
-  const [dirty, setDirty] = React.useState(false)
-  const [saving, setSaving] = React.useState(false)
   const [lastChanged, setLastChanged] = React.useState<{
     by: string
     at: string
@@ -47,188 +60,202 @@ export function KycPolicy() {
     return () => clearTimeout(timer)
   }, [])
 
-  const selectedIndex = Math.max(
-    0,
-    tiers.findIndex((tier) => tier.id === selectedId)
-  )
-  const selectedTier = tiers[selectedIndex] ?? tiers[0]
-
-  function patchTier(id: string, update: (tier: KycTierState) => KycTierState) {
-    setTiers((prev) =>
-      prev.map((tier) => (tier.id === id ? update(tier) : tier))
-    )
-    setDirty(true)
-  }
-
-  function addTier() {
-    seqRef.current += 1
-    const id = `tier-new-${seqRef.current}`
-    setTiers((prev) => [
-      ...prev,
-      {
-        id,
-        name: `Tier ${prev.length + 1}`,
-        daily: 0,
-        balance: 0,
-        reqs: buildReqs({}),
-      },
-    ])
-    setSelectedId(id)
-    setDirty(true)
-  }
-
-  function removeTier(id: string) {
-    setTiers((prev) => {
-      const next = prev.filter((tier) => tier.id !== id)
-      if (id === selectedId) setSelectedId(next[0]?.id ?? "")
-      return next
-    })
-    setDirty(true)
-  }
-
-  function toggleReq(id: string, reqId: string, on: boolean) {
-    patchTier(id, (tier) => ({
-      ...tier,
-      reqs: { ...tier.reqs, [reqId]: { ...tier.reqs[reqId], on } },
-    }))
-  }
-
-  function setProvider(id: string, reqId: string, providerId: string) {
-    patchTier(id, (tier) => ({
-      ...tier,
-      reqs: { ...tier.reqs, [reqId]: { on: true, provider: providerId } },
-    }))
-  }
-
-  /** Apply one provider to a check across every tier that requires it. */
-  function setProviderForRequirement(reqId: string, providerId: string) {
-    setTiers((prev) =>
-      prev.map((tier) =>
-        tier.reqs[reqId]?.on
-          ? {
-              ...tier,
-              reqs: {
-                ...tier.reqs,
-                [reqId]: { on: true, provider: providerId },
-              },
-            }
-          : tier
-      )
-    )
-    setDirty(true)
-  }
-
-  // Tallies across every tier.
-  let configured = 0
-  let pending = 0
-  for (const tier of tiers) {
-    for (const req of KYC_REQUIREMENT_CATALOG) {
-      const state = tier.reqs[req.id]
-      if (!state?.on) continue
-      if (state.provider) configured += 1
-      else pending += 1
-    }
-  }
-
-  async function handleSave() {
-    setSaving(true)
-    await new Promise((resolve) => setTimeout(resolve, 800))
-    setSaving(false)
-    if (pending > 0) {
-      toast.error(
-        `${pending} ${pending === 1 ? "check needs" : "checks need"} a provider before saving`
-      )
-      return
-    }
-    setDirty(false)
+  function recordChange(description: string) {
+    setLastChanged({ by: actorName, at: new Date().toISOString() })
     logActivity({
       action: "kyc.updated",
       target: "KYC configuration",
-      description: `Updated KYC tiers and verification providers (${tiers.length} ${
-        tiers.length === 1 ? "tier" : "tiers"
-      }, ${configured} checks)`,
+      description,
     })
-    setLastChanged({ by: actorName, at: new Date().toISOString() })
-    toast.success("KYC configuration updated")
+  }
+
+  function patchDraft(update: Partial<KycTierState>) {
+    setDraft((prev) => ({ ...prev, ...update }))
+  }
+
+  function toggleReq(reqId: string, on: boolean) {
+    setDraft((prev) => ({
+      ...prev,
+      reqs: { ...prev.reqs, [reqId]: { ...prev.reqs[reqId], on } },
+    }))
+  }
+
+  function setProvider(reqId: string, providerId: string) {
+    setDraft((prev) => ({
+      ...prev,
+      reqs: { ...prev.reqs, [reqId]: { on: true, provider: providerId } },
+    }))
+  }
+
+  function resetDraft() {
+    setDraft(blankDraft())
+    setEditingId(null)
+  }
+
+  function openCreate() {
+    resetDraft()
+    setSheetOpen(true)
+  }
+
+  function openEdit(id: string) {
+    const tier = tiers.find((item) => item.id === id)
+    if (!tier) return
+    setDraft({ ...tier, reqs: { ...tier.reqs } })
+    setEditingId(id)
+    setSheetOpen(true)
+  }
+
+  function handleSheetOpenChange(next: boolean) {
+    setSheetOpen(next)
+    if (!next) resetDraft()
+  }
+
+  function submitTier() {
+    const name = draft.name.trim()
+    if (!name) {
+      toast.error("Give the tier a name")
+      return
+    }
+    const enabledReqs = KYC_REQUIREMENT_CATALOG.filter(
+      (req) => draft.reqs[req.id]?.on
+    )
+    if (enabledReqs.length === 0) {
+      toast.error("Turn on at least one verification check")
+      return
+    }
+    const missing = enabledReqs.find((req) => !draft.reqs[req.id]?.provider)
+    if (missing) {
+      toast.error(`Choose a provider for ${missing.label}`)
+      return
+    }
+
+    if (editingId) {
+      setTiers((prev) =>
+        prev.map((tier) =>
+          tier.id === editingId ? { ...draft, id: editingId, name } : tier
+        )
+      )
+      recordChange(`Updated the “${name}” KYC tier`)
+      toast.success("Tier updated")
+    } else {
+      seqRef.current += 1
+      setTiers((prev) => [
+        ...prev,
+        { ...draft, id: `tier-${seqRef.current}`, name },
+      ])
+      recordChange(`Added the “${name}” KYC tier`)
+      toast.success("Tier added")
+    }
+    setSheetOpen(false)
+    resetDraft()
+  }
+
+  function removeTier(id: string) {
+    const tier = tiers.find((item) => item.id === id)
+    setTiers((prev) => prev.filter((item) => item.id !== id))
+    if (editingId === id) resetDraft()
+    recordChange(`Removed the “${tier?.name || "untitled"}” KYC tier`)
+    toast.success("Tier removed")
   }
 
   if (loading) return <KycPolicySkeleton />
-  if (!selectedTier) return null
 
   return (
     <div className="flex flex-col gap-5">
       <div className="overflow-hidden rounded-xl border border-border bg-card shadow-xs">
-        <div className="flex flex-col lg:min-h-[520px] lg:flex-row">
-          <TierRail
-            tiers={tiers}
-            selectedId={selectedTier.id}
-            onSelect={setSelectedId}
-            onAddTier={addTier}
-          />
-          <TierDetail
-            key={selectedTier.id}
-            tier={selectedTier}
-            index={selectedIndex}
-            removable={tiers.length > 1}
-            onRename={(name) =>
-              patchTier(selectedTier.id, (t) => ({ ...t, name }))
-            }
-            onDailyChange={(daily) =>
-              patchTier(selectedTier.id, (t) => ({ ...t, daily }))
-            }
-            onBalanceChange={(balance) =>
-              patchTier(selectedTier.id, (t) => ({ ...t, balance }))
-            }
-            onToggleReq={(reqId, on) => toggleReq(selectedTier.id, reqId, on)}
-            onProviderChange={(reqId, providerId) =>
-              setProvider(selectedTier.id, reqId, providerId)
-            }
-            onRemoveTier={() => removeTier(selectedTier.id)}
-          />
+        <div className="flex items-center justify-between gap-3 border-b border-border px-4 py-3">
+          <div className="flex flex-col">
+            <h2 className="text-sm font-semibold text-foreground">Tiers</h2>
+            <p className="text-[13px] text-muted-foreground">
+              The verification levels customers can reach. Select one to edit.
+            </p>
+          </div>
+          <Button size="sm" onClick={openCreate}>
+            <HugeiconsIcon icon={PlusSignIcon} className="size-4" />
+            Add tier
+          </Button>
         </div>
 
-        <div className="flex flex-wrap items-center justify-between gap-3 border-t border-border px-4 py-3">
-          <div className="flex flex-col gap-1">
-            <p className="text-[13px] text-muted-foreground">
-              {tiers.length} {tiers.length === 1 ? "tier" : "tiers"} ·{" "}
-              {configured} checks configured
-              {pending > 0 ? (
-                <span className="font-semibold text-warning">
-                  {" "}
-                  · {pending} {pending === 1 ? "check needs" : "checks need"} a
-                  provider
-                </span>
-              ) : dirty ? (
-                <span className="font-medium text-foreground">
-                  {" "}
-                  · Unsaved changes
-                </span>
-              ) : null}
-            </p>
-            <ConfigProvenance by={lastChanged.by} at={lastChanged.at} />
+        {tiers.length === 0 ? (
+          <div className="px-4 py-12 text-center text-sm text-muted-foreground">
+            No tiers yet. Add one to define your verification levels.
           </div>
-          <Button onClick={handleSave} disabled={!dirty || saving}>
-            {saving ? (
-              <>
-                <Spinner /> Saving…
-              </>
-            ) : (
-              "Save changes"
-            )}
-          </Button>
+        ) : (
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Tier</TableHead>
+                  <TableHead>Daily limit</TableHead>
+                  <TableHead>Max balance</TableHead>
+                  <TableHead>Checks</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {tiers.map((tier, index) => (
+                  <TableRow
+                    key={tier.id}
+                    onClick={() => openEdit(tier.id)}
+                    className="cursor-pointer"
+                  >
+                    <TableCell>
+                      <div className="flex items-center gap-2.5">
+                        <span className="flex size-7 shrink-0 items-center justify-center rounded-md bg-muted font-mono text-[11px] font-bold text-foreground">
+                          T{index + 1}
+                        </span>
+                        <span className="font-medium text-foreground">
+                          {tier.name || "Untitled tier"}
+                        </span>
+                      </div>
+                    </TableCell>
+                    <TableCell className="font-mono text-muted-foreground">
+                      {formatNairaShort(tier.daily)}
+                    </TableCell>
+                    <TableCell className="font-mono text-muted-foreground">
+                      {formatNairaShort(tier.balance)}
+                    </TableCell>
+                    <TableCell>
+                      <TierCheckChips tier={tier} />
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <Button
+                        variant="ghost"
+                        size="icon-sm"
+                        className="text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
+                        aria-label={`Delete ${tier.name || "tier"}`}
+                        onClick={(event) => {
+                          event.stopPropagation()
+                          removeTier(tier.id)
+                        }}
+                      >
+                        <HugeiconsIcon icon={Delete02Icon} className="size-4" />
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        )}
+
+        <div className="border-t border-border px-4 py-3">
+          <ConfigProvenance by={lastChanged.by} at={lastChanged.at} />
         </div>
       </div>
 
-      <SectionCard
-        title="Providers"
-        description="The vendor running each verification check. Set one here to apply it across every tier that uses the check — saved together with the tiers above."
-        contentClassName="p-0"
-      >
-        <ProvidersSummary
-          tiers={tiers}
-          onSetProvider={setProviderForRequirement}
-        />
-      </SectionCard>
+      <TierSheet
+        open={sheetOpen}
+        onOpenChange={handleSheetOpenChange}
+        draft={draft}
+        editing={Boolean(editingId)}
+        onNameChange={(value) => patchDraft({ name: value })}
+        onDailyChange={(value) => patchDraft({ daily: value })}
+        onBalanceChange={(value) => patchDraft({ balance: value })}
+        onToggleReq={toggleReq}
+        onProviderChange={setProvider}
+        onSubmit={submitTier}
+      />
     </div>
   )
 }
@@ -237,23 +264,11 @@ function KycPolicySkeleton() {
   return (
     <div className="flex flex-col gap-5">
       <div className="overflow-hidden rounded-xl border border-border bg-card">
-        <div className="flex flex-col lg:flex-row">
-          <div className="flex w-full flex-col gap-1.5 border-border p-3.5 max-lg:border-b lg:w-72 lg:border-r">
-            {Array.from({ length: 3 }).map((_, index) => (
-              <Skeleton key={index} className="h-13 w-full rounded-xl" />
-            ))}
-          </div>
-          <div className="flex flex-1 flex-col gap-4 p-5">
-            <Skeleton className="h-8 w-48" />
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-              <Skeleton className="h-10" />
-              <Skeleton className="h-10" />
-            </div>
-            {Array.from({ length: 4 }).map((_, index) => (
-              <Skeleton key={index} className="h-16 w-full rounded-xl" />
-            ))}
-          </div>
+        <div className="flex items-center justify-between border-b border-border px-4 py-3">
+          <Skeleton className="h-8 w-40" />
+          <Skeleton className="h-8 w-24" />
         </div>
+        <TableSkeleton columns={5} rows={3} />
       </div>
     </div>
   )

@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { KYC_PROVIDER_CATALOG } from "@/lib/constants"
 import { cn } from "@/lib/utils"
+import { providerBadgeClass } from "./kyc-meta"
 
 interface ProviderSelectProps {
   /** Provider ids this requirement supports, in preference order. */
@@ -21,10 +22,15 @@ interface ProviderSelectProps {
   onChange: (providerId: string) => void
 }
 
-/** Monogram chip for a provider — uniform primary tint, on-token (no brand hex). */
-function ProviderBadge({ initial }: { initial: string }) {
+/** Monogram chip for a provider — soft categorical colour from the swatch palette. */
+function ProviderBadge({ id, initial }: { id: string; initial: string }) {
   return (
-    <span className="flex size-5 shrink-0 items-center justify-center rounded-[6px] bg-primary/10 font-mono text-[11px] font-bold text-primary">
+    <span
+      className={cn(
+        "flex size-5 shrink-0 items-center justify-center rounded-[6px] font-mono text-[11px] font-bold",
+        providerBadgeClass(id)
+      )}
+    >
       {initial}
     </span>
   )
@@ -46,7 +52,9 @@ export function ProviderSelect({ options, value, onChange }: ProviderSelectProps
                 : "border-warning/40 bg-warning/10 hover:bg-warning/15"
             )}
           >
-            {selected ? <ProviderBadge initial={selected.initial} /> : null}
+            {selected ? (
+              <ProviderBadge id={selected.id} initial={selected.initial} />
+            ) : null}
             <span
               className={cn(
                 "min-w-0 flex-1 truncate text-[13px] font-semibold",
@@ -78,7 +86,7 @@ export function ProviderSelect({ options, value, onChange }: ProviderSelectProps
                 onClick={() => onChange(id)}
                 className="gap-2.5"
               >
-                <ProviderBadge initial={provider.initial} />
+                <ProviderBadge id={provider.id} initial={provider.initial} />
                 <span className="flex-1 truncate text-[13px] font-semibold text-foreground">
                   {provider.name}
                 </span>

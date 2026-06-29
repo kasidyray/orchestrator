@@ -111,7 +111,7 @@ export function AccountMenu() {
           <HugeiconsIcon icon={Settings02Icon} />
           Organisation settings
         </DropdownMenuItem>
-        <DropdownMenuItem render={<Link href="/settings" />}>
+        <DropdownMenuItem render={<Link href="/profile" />}>
           <HugeiconsIcon icon={UserCircleIcon} />
           Profile settings
         </DropdownMenuItem>

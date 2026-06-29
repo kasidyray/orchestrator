@@ -6,7 +6,7 @@ import { VerifyEmailActions } from "@/components/features/auth/verify-email-acti
 export default function VerifyEmailPage() {
   return (
     <div className="flex flex-col items-center gap-6 text-center">
-      <div className="flex size-14 items-center justify-center rounded-full bg-success/10 text-success">
+      <div className="flex size-14 items-center justify-center rounded-full bg-muted text-muted-foreground">
         <HugeiconsIcon icon={MailValidation01Icon} className="size-7" />
       </div>
 
@@ -15,11 +15,11 @@ export default function VerifyEmailPage() {
           Verify your email
         </h1>
         <p className="text-sm text-muted-foreground">
-          We sent a verification link to{" "}
+          We sent a 6-digit code to{" "}
           <span className="font-medium text-foreground">
             ikedi@kudalite.africa
           </span>
-          . Click it to activate your account, then continue.
+          . Enter it below to activate your account.
         </p>
       </div>
 

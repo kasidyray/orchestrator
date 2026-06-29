@@ -122,7 +122,7 @@ export function WalletProductCard({
                       if (event.key === "Escape") setEditing(false)
                     }}
                     autoFocus
-                    className="h-7 w-44"
+                    className="w-44"
                     aria-label="Wallet name"
                   />
                   <Button
