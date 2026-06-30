@@ -42,7 +42,7 @@ export function ComboField({
         id={id}
         placeholder={placeholder}
         aria-invalid={ariaInvalid}
-        className="w-full"
+        className="h-10 w-full"
       />
       <ComboboxContent>
         <ComboboxEmpty>No matches found.</ComboboxEmpty>

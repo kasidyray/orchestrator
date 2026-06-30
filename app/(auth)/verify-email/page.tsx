@@ -25,9 +25,6 @@ export default function VerifyEmailPage() {
 
       <VerifyEmailActions />
 
-      <p className="text-xs text-muted-foreground">
-        Wrong address? Update it from your account settings after signing in.
-      </p>
     </div>
   )
 }

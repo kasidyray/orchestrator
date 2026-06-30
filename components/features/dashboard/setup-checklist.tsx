@@ -27,6 +27,36 @@ export function SetupChecklist() {
   const [webhookOpen, setWebhookOpen] = React.useState(false)
   const [apiKeyOpen, setApiKeyOpen] = React.useState(false)
 
+  // Single sliding hover highlight: rests on the next step, glides to whatever
+  // row is hovered, then eases back on mouse leave.
+  const itemRefs = React.useRef<Array<HTMLLIElement | null>>([])
+  const [activeIndex, setActiveIndex] = React.useState(nextIndex)
+  const [box, setBox] = React.useState<{ top: number; height: number } | null>(
+    null
+  )
+
+  React.useEffect(() => {
+    setActiveIndex(nextIndex)
+  }, [nextIndex])
+
+  React.useLayoutEffect(() => {
+    function measure() {
+      const el = activeIndex >= 0 ? itemRefs.current[activeIndex] : null
+      const next = el
+        ? { top: el.offsetTop, height: el.offsetHeight }
+        : null
+      setBox((prev) => {
+        if (prev === next) return prev
+        if (prev && next && prev.top === next.top && prev.height === next.height)
+          return prev
+        return next
+      })
+    }
+    measure()
+    window.addEventListener("resize", measure)
+    return () => window.removeEventListener("resize", measure)
+  }, [activeIndex, steps.length])
+
   return (
     <div className="mx-auto w-full max-w-2xl pt-2 sm:pt-8">
       <div className="flex flex-col items-center gap-2 text-center">
@@ -39,13 +69,30 @@ export function SetupChecklist() {
         </p>
       </div>
 
-      <ol className="mt-8 flex flex-col gap-1">
+      <ol
+        className="relative mt-8 flex flex-col gap-1"
+        onMouseLeave={() => setActiveIndex(nextIndex)}
+      >
+        {/* Sliding hover highlight */}
+        <div
+          aria-hidden
+          className={cn(
+            "pointer-events-none absolute inset-x-0 z-0 rounded-xl bg-muted transition-all duration-200 ease-out motion-reduce:transition-none",
+            box ? "opacity-100" : "opacity-0"
+          )}
+          style={box ? { top: box.top, height: box.height } : undefined}
+        />
+
         {steps.map((step, index) => (
           <StepRow
             key={step.id}
             step={step}
             number={index + 1}
             isNext={index === nextIndex}
+            innerRef={(el) => {
+              itemRefs.current[index] = el
+            }}
+            onMouseEnter={() => setActiveIndex(index)}
             // Webhooks and API keys are created in a modal rather than their
             // own pages.
             onAction={
@@ -77,11 +124,16 @@ function StepRow({
   step,
   number,
   isNext,
+  innerRef,
+  onMouseEnter,
   onAction,
 }: {
   step: SetupStepState
   number: number
   isNext: boolean
+  /** Ref to the row element, used to position the sliding highlight. */
+  innerRef?: (el: HTMLLIElement | null) => void
+  onMouseEnter?: () => void
   /** When set, the action opens this handler instead of navigating to href. */
   onAction?: () => void
 }) {
@@ -91,10 +143,9 @@ function StepRow({
 
   return (
     <li
-      className={cn(
-        "flex items-center gap-4 rounded-xl px-3 py-4 transition-colors",
-        isNext && "bg-muted/60"
-      )}
+      ref={innerRef}
+      onMouseEnter={onMouseEnter}
+      className="relative z-10 flex items-center gap-4 rounded-xl px-3 py-4"
     >
       <span
         className={cn(

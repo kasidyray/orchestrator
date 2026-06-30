@@ -55,21 +55,14 @@ export function AddressStep({
 
         <div className="grid gap-5 sm:grid-cols-2">
           <FormField id="org-state" label="State" error={errors.state}>
-            <Select
+            <ComboField
+              id="org-state"
+              options={NIGERIA_STATES}
               value={values.state}
-              onValueChange={(value) => onChange("state", value ?? "")}
-            >
-              <SelectTrigger id="org-state" className="w-full">
-                <SelectValue placeholder="Select…" />
-              </SelectTrigger>
-              <SelectContent>
-                {NIGERIA_STATES.map((option) => (
-                  <SelectItem key={option} value={option}>
-                    {option}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+              onChange={(value) => onChange("state", value)}
+              placeholder="Search state…"
+              ariaInvalid={Boolean(errors.state)}
+            />
           </FormField>
 
           <FormField id="org-country" label="Country" error={errors.country}>
