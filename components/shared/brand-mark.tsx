@@ -11,7 +11,7 @@ interface BrandMarkProps {
   className?: string
 }
 
-/** Afrinvest Optimus logo mark + wordmark. */
+/** Optimus Business logo mark + wordmark. */
 export function BrandMark({
   variant = "default",
   iconOnly = false,
@@ -31,7 +31,7 @@ export function BrandMark({
       </div>
       {iconOnly ? null : (
         <span className="text-sm font-semibold tracking-tight">
-          Afrinvest Optimus
+          Optimus Business
         </span>
       )}
     </div>

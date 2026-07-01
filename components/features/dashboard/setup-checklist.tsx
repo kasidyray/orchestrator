@@ -2,6 +2,7 @@
 
 import * as React from "react"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 import { HugeiconsIcon } from "@hugeicons/react"
 import { ArrowRight01Icon, Tick02Icon } from "@hugeicons/core-free-icons"
 
@@ -18,8 +19,11 @@ import { cn } from "@/lib/utils"
 /**
  * Onboarding view for a new business: a centered header + subtitle over a
  * numbered checklist in a constrained column. The next step is emphasised;
- * completed steps show a green check. Completion is read from the shared store
- * so the sidebar mini-progress advances in lockstep.
+ * completed steps show a green check and stay clickable so they can be reopened
+ * and edited — only while the checklist is visible (i.e. setup is unfinished),
+ * since completing the last step swaps this whole view for the dashboard.
+ * Completion is read from the shared store so the sidebar mini-progress advances
+ * in lockstep.
  */
 export function SetupChecklist() {
   const { steps, setSetupStep } = useSetupProgress()
@@ -137,15 +141,37 @@ function StepRow({
   /** When set, the action opens this handler instead of navigating to href. */
   onAction?: () => void
 }) {
+  const router = useRouter()
   const actionProps = onAction
     ? { onClick: onAction }
     : { render: <Link href={step.href} />, nativeButton: false as const }
+
+  // A completed row reopens the same destination — its modal, or its page.
+  const activate = onAction ?? (() => router.push(step.href))
+  const completedProps = step.completed
+    ? {
+        role: "button" as const,
+        tabIndex: 0,
+        onClick: activate,
+        onKeyDown: (event: React.KeyboardEvent<HTMLLIElement>) => {
+          if (event.key === "Enter" || event.key === " ") {
+            event.preventDefault()
+            activate()
+          }
+        },
+      }
+    : {}
 
   return (
     <li
       ref={innerRef}
       onMouseEnter={onMouseEnter}
-      className="relative z-10 flex items-center gap-4 rounded-xl px-3 py-4"
+      {...completedProps}
+      className={cn(
+        "group relative z-10 flex items-center gap-4 rounded-xl px-3 py-4 outline-none",
+        step.completed &&
+          "cursor-pointer focus-visible:ring-2 focus-visible:ring-ring/50"
+      )}
     >
       <span
         className={cn(
@@ -173,12 +199,21 @@ function StepRow({
       </div>
 
       {step.completed ? (
-        <span
-          className="grid size-8 shrink-0 place-items-center rounded-full bg-success text-success-foreground"
-          aria-label="Completed"
-        >
-          <HugeiconsIcon icon={Tick02Icon} className="size-4" strokeWidth={3} />
-        </span>
+        <div className="flex shrink-0 items-center gap-3">
+          <span className="text-[13px] font-medium text-muted-foreground opacity-0 transition-opacity duration-100 group-hover:opacity-100 motion-reduce:transition-none">
+            Edit
+          </span>
+          <span
+            className="grid size-8 place-items-center rounded-full bg-success text-success-foreground"
+            aria-label="Completed"
+          >
+            <HugeiconsIcon
+              icon={Tick02Icon}
+              className="size-4"
+              strokeWidth={3}
+            />
+          </span>
+        </div>
       ) : isNext ? (
         <Button size="sm" className="shrink-0" {...actionProps}>
           {step.actionLabel}

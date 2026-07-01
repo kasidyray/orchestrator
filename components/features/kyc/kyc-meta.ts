@@ -51,6 +51,8 @@ export const PROVIDER_BADGE_CLASS: Record<string, string> = {
   metamap: "bg-swatch-2/20 text-swatch-2",
   verifyme: "bg-swatch-6/20 text-swatch-6",
   youverify: "bg-swatch-5/20 text-swatch-5",
+  // Neutral, deliberately distinct from the vendor swatches.
+  custom: "bg-foreground/10 text-foreground",
 }
 
 export function providerBadgeClass(id: string | null | undefined): string {

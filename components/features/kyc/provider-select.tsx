@@ -9,9 +9,10 @@ import {
   DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { KYC_PROVIDER_CATALOG } from "@/lib/constants"
+import { CUSTOM_PROVIDER_ID, KYC_PROVIDER_CATALOG } from "@/lib/constants"
 import { cn } from "@/lib/utils"
 import { providerBadgeClass } from "./kyc-meta"
 
@@ -100,6 +101,31 @@ export function ProviderSelect({ options, value, onChange }: ProviderSelectProps
             )
           })}
         </DropdownMenuGroup>
+
+        {/* Custom is offered on every requirement, set apart from the vendors. */}
+        {!options.includes(CUSTOM_PROVIDER_ID) ? (
+          <>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem
+              onClick={() => onChange(CUSTOM_PROVIDER_ID)}
+              className="gap-2.5"
+            >
+              <ProviderBadge
+                id={CUSTOM_PROVIDER_ID}
+                initial={KYC_PROVIDER_CATALOG[CUSTOM_PROVIDER_ID].initial}
+              />
+              <span className="flex-1 truncate text-[13px] font-semibold text-foreground">
+                {KYC_PROVIDER_CATALOG[CUSTOM_PROVIDER_ID].name}
+              </span>
+              {value === CUSTOM_PROVIDER_ID ? (
+                <HugeiconsIcon
+                  icon={Tick01Icon}
+                  className="size-4 shrink-0 text-primary"
+                />
+              ) : null}
+            </DropdownMenuItem>
+          </>
+        ) : null}
       </DropdownMenuContent>
     </DropdownMenu>
   )

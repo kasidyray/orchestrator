@@ -5,12 +5,12 @@ import { LoginForm } from "@/components/features/auth/login-form"
 export default function LoginPage() {
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex flex-col gap-2">
+      <div className="flex flex-col gap-2 text-center">
         <h1 className="text-2xl font-semibold tracking-tight">
-          Sign in to Optimus
+          Sign in to Optimus Business
         </h1>
         <p className="text-sm text-muted-foreground">
-          Welcome back. Enter your details to continue.
+          Sign in to Optimus Business to access your account.
         </p>
       </div>
 
@@ -22,7 +22,7 @@ export default function LoginPage() {
           href="/register"
           className="font-medium text-foreground underline-offset-4 hover:underline"
         >
-          Create one
+          Sign up
         </Link>
       </p>
     </div>

@@ -23,6 +23,7 @@ import { GoLiveSwitch } from "@/components/shared/AppShell/go-live-switch"
 import { NotificationsMenu } from "@/components/shared/AppShell/notifications-menu"
 import { SidebarNav } from "@/components/shared/AppShell/sidebar-nav"
 import { AccountMenu } from "@/components/shared/AppShell/account-menu"
+import { BusinessIdBadge } from "@/components/shared/AppShell/business-id-badge"
 
 /**
  * Slim utility bar. A contextual breadcrumb orients on the left; quick actions
@@ -87,6 +88,8 @@ export function TopBar() {
           <HugeiconsIcon icon={BookOpen01Icon} />
           Docs
         </Button>
+
+        <BusinessIdBadge className="ml-1 hidden md:flex" />
 
         <span
           className="mx-1 hidden h-5 w-px bg-border sm:block"

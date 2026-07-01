@@ -5,6 +5,7 @@ import { HugeiconsIcon } from "@hugeicons/react"
 import { ArrowRight01Icon } from "@hugeicons/core-free-icons"
 
 import { Button } from "@/components/ui/button"
+import { CopyButton } from "@/components/shared/copy-button"
 import {
   EditFieldDialog,
   type EditableField,
@@ -74,6 +75,25 @@ export function GeneralSettings({ org }: { org: Organisation }) {
   return (
     <>
       <dl className="border-t">
+        {/* Read-only system identifier — surfaced for support and API references. */}
+        <div className="grid grid-cols-1 gap-2 border-b py-6 sm:grid-cols-[1fr_1.6fr] sm:gap-8">
+          <dt className="flex flex-col">
+            <span className="text-sm font-medium text-foreground">
+              Business ID
+            </span>
+            <span className="mt-1 text-sm text-muted-foreground">
+              Your unique organisation identifier. Share it with support or use
+              it in API references.
+            </span>
+          </dt>
+          <dd className="flex items-center gap-2">
+            <code className="rounded-md bg-muted px-2 py-1 font-mono text-sm text-foreground">
+              {org.id}
+            </code>
+            <CopyButton value={org.id} label="Copy business ID" />
+          </dd>
+        </div>
+
         {FIELDS.map((field) => (
           <div
             key={field.key}

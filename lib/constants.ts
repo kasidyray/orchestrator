@@ -109,7 +109,12 @@ export const KYC_PROVIDER_CATALOG: Record<string, KycProvider> = {
   metamap: { id: "metamap", name: "Metamap", initial: "M" },
   verifyme: { id: "verifyme", name: "VerifyMe", initial: "V" },
   youverify: { id: "youverify", name: "Youverify", initial: "Y" },
+  // Bring-your-own: run this check against your own integration.
+  custom: { id: "custom", name: "Custom", initial: "C" },
 }
+
+/** Universal provider option offered on every requirement, beyond its vendors. */
+export const CUSTOM_PROVIDER_ID = "custom"
 
 export interface KycRequirement {
   id: string

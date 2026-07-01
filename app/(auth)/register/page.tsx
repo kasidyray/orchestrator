@@ -5,7 +5,7 @@ import { RegisterForm } from "@/components/features/auth/register-form"
 export default function RegisterPage() {
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex flex-col gap-2">
+      <div className="flex flex-col gap-2 text-center">
         <h1 className="text-2xl font-semibold tracking-tight">
           Create your account
         </h1>
