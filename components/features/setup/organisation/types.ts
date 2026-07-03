@@ -19,6 +19,7 @@ export interface OrgProfileValues {
   repDob: string
   repNationality: string
   bvn: string
+  nin: string
 }
 
 export type OrgProfileField = keyof OrgProfileValues

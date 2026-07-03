@@ -19,6 +19,7 @@ export default function OrganisationSetupPage() {
         repDob: "",
         repNationality: "",
         bvn: "",
+        nin: "",
       }}
     />
   )

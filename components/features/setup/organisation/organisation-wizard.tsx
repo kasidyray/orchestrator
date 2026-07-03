@@ -144,6 +144,8 @@ export function OrganisationWizard({
       next.repLastName = "Enter the legal last name"
     if (!values.bvn) next.bvn = "Enter the 11-digit BVN"
     else if (values.bvn.length !== 11) next.bvn = "BVN must be 11 digits"
+    if (!values.nin) next.nin = "Enter the 11-digit NIN"
+    else if (values.nin.length !== 11) next.nin = "NIN must be 11 digits"
     setErrors(next)
     const hasRole = roles.length > 0
     setRolesError(hasRole ? undefined : "Select at least one role")

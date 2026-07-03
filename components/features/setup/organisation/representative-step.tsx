@@ -148,24 +148,45 @@ export function RepresentativeStep({
         title={`Next, let’s verify ${poss} identity`}
         description={`As a regulated financial services company, we would need to verify ${poss} identity.`}
       >
-        <FormField
-          id="rep-bvn"
-          label={`${Poss} bank verification number (BVN)`}
-          error={errors.bvn}
-          hint="11-digit BVN"
-        >
-          <Input
+        <div className="grid gap-5 sm:grid-cols-2">
+          <FormField
             id="rep-bvn"
-            value={values.bvn}
-            inputMode="numeric"
-            maxLength={11}
-            placeholder={`Enter ${poss} BVN`}
-            onChange={(event) =>
-              onChange("bvn", event.target.value.replace(/[^\d]/g, ""))
-            }
-            aria-invalid={Boolean(errors.bvn)}
-          />
-        </FormField>
+            label={`${Poss} bank verification number (BVN)`}
+            error={errors.bvn}
+            hint="11-digit BVN"
+          >
+            <Input
+              id="rep-bvn"
+              value={values.bvn}
+              inputMode="numeric"
+              maxLength={11}
+              placeholder={`Enter ${poss} BVN`}
+              onChange={(event) =>
+                onChange("bvn", event.target.value.replace(/[^\d]/g, ""))
+              }
+              aria-invalid={Boolean(errors.bvn)}
+            />
+          </FormField>
+
+          <FormField
+            id="rep-nin"
+            label={`${Poss} national identity number (NIN)`}
+            error={errors.nin}
+            hint="11-digit NIN"
+          >
+            <Input
+              id="rep-nin"
+              value={values.nin}
+              inputMode="numeric"
+              maxLength={11}
+              placeholder={`Enter ${poss} NIN`}
+              onChange={(event) =>
+                onChange("nin", event.target.value.replace(/[^\d]/g, ""))
+              }
+              aria-invalid={Boolean(errors.nin)}
+            />
+          </FormField>
+        </div>
 
         <FileInput
           id="doc-director-id"

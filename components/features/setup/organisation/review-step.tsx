@@ -56,6 +56,7 @@ export function ReviewStep({ values, roles, documents }: ReviewStepProps) {
     { label: "Nationality", value: values.repNationality },
     { label: "Role at the business", value: roleLabels },
     { label: "BVN", value: values.bvn },
+    { label: "NIN", value: values.nin },
   ]
 
   return (
