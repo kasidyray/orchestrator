@@ -81,7 +81,7 @@ import { Search01Icon } from "@hugeicons/core-free-icons"
 - **Verify an icon name exists** in `@hugeicons/core-free-icons` before importing
   (names vary: `ApiIcon` not `Api01Icon`, `WebhookIcon` not `Webhook01Icon`,
   `UserMultipleIcon` not `UserMulti02Icon`).
-- `@tabler/icons-react` is installed but unused — do not introduce new Tabler imports.
+- `@tabler/icons-react` was removed in cleanup — do not introduce Tabler imports.
 
 ---
 
@@ -97,6 +97,12 @@ first** — then use it. Never work around the token system.
 **Existing token values are locked.** You may only **append** new tokens
 (additive edits). To add a colour utility in Tailwind v4 you must add it in
 **three** places:
+
+> **Re-baseline (owner-approved, Jul 2026):** `--radius` 0.875→0.75rem;
+> `--primary` chroma 0.243→0.19 (light) / 0.199→0.17 (dark); `--sidebar-primary`
+> chroma 0.245→0.19 (light) / 0.214→0.18 (dark). The values now in
+> `globals.css` are the canonical locked set — do not "restore" the old ones,
+> and do not change any token value again without explicit owner approval.
 1. raw var in `:root`
 2. raw var in `.dark`
 3. `--color-*` mapping in the `@theme inline` block (mandatory — without it the
@@ -212,7 +218,7 @@ app/
 components/
   ui/                shadcn primitives — DO NOT hand-edit
   shared/            extended/composed: AppShell/, DataTable/, StatusBadge,
-                     EmptyState, SkeletonCard, PageHeader, SectionCard, CopyButton
+                     EmptyState, PageHeader, SectionCard, CopyButton
   features/          feature-specific: auth/ dashboard/ customers/ transactions/
                      setup/ developer/ settings/
 lib/                 mock-data.ts · types.ts · constants.ts · utils.ts
@@ -276,7 +282,8 @@ Installed Hugeicons / Zustand / TanStack Query / nextjs-toploader / sonner; adde
 `badge card skeleton tooltip separator`; appended success/warning/info + env
 tokens to `globals.css`; built `lib/{types,mock-data,constants,utils}.ts`,
 `providers/index.tsx`, `store/index.ts`, and shared `EmptyState`, `StatusBadge`,
-`SkeletonCard`, `PageHeader`, `SectionCard`, `CopyButton`. `/demo` exercises them.
+`PageHeader`, `SectionCard`, `CopyButton`. (The `/demo` exercise route and the
+unused `SkeletonCard`/`Stepper` were removed in a later cleanup.)
 
 ---
 

@@ -46,10 +46,12 @@ export function GoLiveSwitch() {
         aria-label="Go live"
       />
       {!liveUnlocked ? (
-        <HugeiconsIcon
-          icon={SquareLock02Icon}
-          className="size-3.5 text-muted-foreground"
-        />
+        <span className="flex size-5 items-center justify-center rounded-full bg-muted">
+          <HugeiconsIcon
+            icon={SquareLock02Icon}
+            className="size-3 text-muted-foreground"
+          />
+        </span>
       ) : null}
     </div>
   )

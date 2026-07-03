@@ -13,7 +13,7 @@ import {
 } from "@/hooks/use-setup-progress"
 import { CreateWebhookDialog } from "@/components/features/setup/webhooks/create-webhook-dialog"
 import { CreateApiKeyDialog } from "@/components/features/setup/api-keys/create-api-key-dialog"
-import { CelebrationIllustration } from "@/components/features/dashboard/celebration-illustration"
+import { SummitIllustration } from "@/components/features/dashboard/celebration-illustration"
 import { cn } from "@/lib/utils"
 
 /**
@@ -39,9 +39,13 @@ export function SetupChecklist() {
     null
   )
 
-  React.useEffect(() => {
+  // Follow the next incomplete step as it changes — adjusted during render
+  // (comparing against the previous value) rather than in an effect.
+  const [prevNextIndex, setPrevNextIndex] = React.useState(nextIndex)
+  if (nextIndex !== prevNextIndex) {
+    setPrevNextIndex(nextIndex)
     setActiveIndex(nextIndex)
-  }, [nextIndex])
+  }
 
   React.useLayoutEffect(() => {
     function measure() {
@@ -64,7 +68,7 @@ export function SetupChecklist() {
   return (
     <div className="mx-auto w-full max-w-2xl pt-2 sm:pt-8">
       <div className="flex flex-col items-center gap-2 text-center">
-        <CelebrationIllustration className="mb-2 animate-float-soft" />
+        <SummitIllustration className="mb-2" />
         <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-[28px]">
           Let&apos;s get you set up.
         </h1>

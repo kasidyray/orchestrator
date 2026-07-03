@@ -1,10 +1,9 @@
 import type { SVGProps } from "react"
 
 /**
- * Celebratory rocket for the onboarding header — same layered style as the
- * auth value illustrations, but using the full accent palette. Built only from
- * `globals.css` tokens (no raw palette): an info-blue body, a warning→
- * destructive flame, success-green fins, and multicolour confetti sparkles.
+ * Celebratory rocket — kept for future moments (empty states, launch events).
+ * Full accent palette: info-blue body, warning→destructive flame, success fins,
+ * confetti sparkles drifting on their own phases. Pair with `animate-float-soft`.
  */
 export function CelebrationIllustration(props: SVGProps<SVGSVGElement>) {
   return (
@@ -50,7 +49,7 @@ export function CelebrationIllustration(props: SVGProps<SVGSVGElement>) {
       <circle cx="36" cy="28" r="6" fill="var(--primary-foreground)" />
       <circle cx="36" cy="28" r="3" fill="var(--info)" opacity="0.8" />
 
-      {/* Confetti sparkles — one per swatch, each drifting on its own phase */}
+      {/* Confetti sparkles — one per swatch */}
       <path
         className="animate-sparkle"
         style={{ animationDelay: "0s", animationDuration: "2.8s" }}
@@ -76,6 +75,72 @@ export function CelebrationIllustration(props: SVGProps<SVGSVGElement>) {
         cy="38"
         r="2"
         fill="var(--info)"
+      />
+    </svg>
+  )
+}
+
+/**
+ * Onboarding hero mark — a brand-blue trail marching up a brand-blue peak to a
+ * waving flag at the summit. Trail and main peak are `--primary`; the teal back
+ * ridge, glowing amber moon, and red goal flag come from the swatch palette.
+ */
+export function SummitIllustration(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg
+      width={96}
+      height={96}
+      viewBox="0 0 96 96"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      {...props}
+    >
+      {/* Moon, bobbing gently */}
+      <circle
+        className="animate-float-soft"
+        cx="22"
+        cy="24"
+        r="6"
+        fill="var(--swatch-3)"
+        opacity="0.9"
+      />
+
+      {/* Back ridge */}
+      <path
+        d="M14 78 L40 42 L58 78 Z"
+        fill="var(--swatch-4)"
+        opacity="0.25"
+      />
+      {/* Main peak — brand blue */}
+      <path d="M34 78 L62 30 L88 78 Z" fill="var(--primary)" opacity="0.45" />
+      {/* Snow cap */}
+      <path d="M56.5 39.5 L62 30 L67.5 39.5 L64 42.5 L62 40 L59.5 42.5 Z" fill="var(--card)" opacity="0.9" />
+
+      {/* Brand-blue trail marching toward the summit */}
+      <path
+        className="animate-dash-march"
+        d="M20 76 C34 72 42 62 50 52 C54 47 58 41 61 33"
+        stroke="var(--primary)"
+        strokeWidth="2.25"
+        strokeLinecap="round"
+        strokeDasharray="1 9"
+        opacity="0.9"
+      />
+
+      {/* Summit flag */}
+      <line
+        x1="62"
+        y1="30"
+        x2="62"
+        y2="16"
+        stroke="var(--foreground)"
+        strokeWidth="2"
+        strokeLinecap="round"
+      />
+      <path
+        className="animate-flag-wave"
+        d="M62 16 L76 19.5 L62 23 Z"
+        fill="var(--swatch-6)"
       />
     </svg>
   )

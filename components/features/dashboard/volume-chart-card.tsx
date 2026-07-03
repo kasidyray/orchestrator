@@ -72,7 +72,7 @@ export function VolumeChartCard({
           <p className="text-sm font-medium text-muted-foreground">
             Transaction volume
           </p>
-          <p className="mt-1.5 font-mono text-[30px] leading-none font-bold tracking-tight tabular-nums">
+          <p className="mt-1.5 font-mono text-[28px] leading-none font-semibold tracking-tight tabular-nums">
             {formatCurrency(series.total, "NGN")}
           </p>
           <div className="mt-2 flex items-center gap-1.5 text-xs">

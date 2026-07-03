@@ -58,13 +58,16 @@ export function EditFieldDialog<K extends string>({
   const [value, setValue] = React.useState(currentValue)
   const [saving, setSaving] = React.useState(false)
 
-  // Reset the draft whenever a different field is opened.
-  React.useEffect(() => {
+  // Reset the draft whenever a different field is opened — adjusted during
+  // render (comparing against the previous `field`) rather than in an effect.
+  const [prevField, setPrevField] = React.useState(field)
+  if (field !== prevField) {
+    setPrevField(field)
     if (field) {
       setValue(currentValue)
       setSaving(false)
     }
-  }, [field, currentValue])
+  }
 
   async function handleSave() {
     if (!field) return

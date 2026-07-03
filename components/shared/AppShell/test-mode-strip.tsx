@@ -15,7 +15,7 @@ export function TestModeStrip() {
   return (
     <div className="sticky top-14 z-20 h-0.5 bg-warning">
       <span className="absolute top-0 left-1/2 -translate-x-1/2 rounded-b-md bg-warning px-2.5 pt-px pb-0.5 text-[10px] font-semibold tracking-wider text-warning-foreground uppercase shadow-sm">
-        Test Mode
+        Test mode
       </span>
     </div>
   )

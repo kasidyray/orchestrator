@@ -7,7 +7,6 @@ import { toast } from "sonner"
 
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
-import { Label } from "@/components/ui/label"
 import {
   Dialog,
   DialogClose,
@@ -52,8 +51,11 @@ export function TwoFactorDialog({
   const [error, setError] = React.useState(false)
   const [saved, setSaved] = React.useState(false)
 
-  // Reset to a clean state whenever the dialog reopens.
-  React.useEffect(() => {
+  // Reset to a clean state whenever the dialog reopens — adjusted during
+  // render (comparing against the previous `open`) rather than in an effect.
+  const [wasOpen, setWasOpen] = React.useState(open)
+  if (open !== wasOpen) {
+    setWasOpen(open)
     if (open) {
       setStep("scan")
       setCode("")
@@ -61,7 +63,7 @@ export function TwoFactorDialog({
       setError(false)
       setSaved(false)
     }
-  }, [open])
+  }
 
   async function handleVerify() {
     setVerifying(true)
@@ -133,8 +135,8 @@ export function TwoFactorDialog({
             <DialogHeader>
               <DialogTitle>Enter the 6-digit code</DialogTitle>
               <DialogDescription>
-                Enter the code shown in your authenticator app to confirm it's
-                linked.
+                Enter the code shown in your authenticator app to confirm
+                it&apos;s linked.
               </DialogDescription>
             </DialogHeader>
 
@@ -220,7 +222,7 @@ export function TwoFactorDialog({
                   onCheckedChange={(checked) => setSaved(checked === true)}
                 />
                 <span className="text-sm text-foreground">
-                  I've saved my recovery codes
+                  I&apos;ve saved my recovery codes
                 </span>
               </label>
             </div>
@@ -235,6 +237,24 @@ export function TwoFactorDialog({
         )}
       </DialogContent>
     </Dialog>
+  )
+}
+
+/** One corner "finder" square of the faux QR code. */
+function Finder({ x, y }: { x: number; y: number }) {
+  return (
+    <>
+      <rect x={x} y={y} width={7} height={7} rx={1.5} fill="var(--foreground)" />
+      <rect
+        x={x + 1}
+        y={y + 1}
+        width={5}
+        height={5}
+        rx={1}
+        fill="var(--background)"
+      />
+      <rect x={x + 2} y={y + 2} width={3} height={3} fill="var(--foreground)" />
+    </>
   )
 }
 
@@ -253,21 +273,6 @@ function QrPlaceholder() {
       if ((x * 13 + y * 7 + 5) % 3 === 0) modules.push({ x, y })
     }
   }
-
-  const Finder = ({ x, y }: { x: number; y: number }) => (
-    <>
-      <rect x={x} y={y} width={7} height={7} rx={1.5} fill="var(--foreground)" />
-      <rect
-        x={x + 1}
-        y={y + 1}
-        width={5}
-        height={5}
-        rx={1}
-        fill="var(--background)"
-      />
-      <rect x={x + 2} y={y + 2} width={3} height={3} fill="var(--foreground)" />
-    </>
-  )
 
   return (
     <div className="rounded-xl border border-border bg-background p-3">

@@ -63,7 +63,7 @@ export function MetricStat({ metric }: { metric: MetricStatData }) {
         {metric.label}
       </span>
 
-      <p className="font-mono text-[26px] leading-none font-bold tracking-tight tabular-nums">
+      <p className="font-mono text-[26px] leading-none font-semibold tracking-tight tabular-nums">
         <CountUp value={metric.value} format={format} />
       </p>
 

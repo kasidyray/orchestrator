@@ -66,7 +66,13 @@ function NavLink({
         <span className="absolute inset-y-1.5 left-0 w-0.5 rounded-full bg-sidebar-primary" />
       ) : null}
       {nested ? null : (
-        <HugeiconsIcon icon={item.icon} className="size-4.5 shrink-0" />
+        <HugeiconsIcon
+          icon={item.icon}
+          className={cn(
+            "size-4.5 shrink-0 transition-colors duration-100",
+            active && "text-sidebar-primary"
+          )}
+        />
       )}
       {item.label}
     </Link>
