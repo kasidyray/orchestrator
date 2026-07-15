@@ -3,9 +3,9 @@
 import { HugeiconsIcon } from "@hugeicons/react"
 import { Delete02Icon, Edit03Icon, PlusSignIcon } from "@hugeicons/core-free-icons"
 
-import { KYC_REQUIREMENT_CATALOG } from "@/lib/constants"
 import { cn, formatNairaShort } from "@/lib/utils"
 import { TierCheckChips } from "./tier-check-chips"
+import { inheritedChecks, introducedReqIds } from "./kyc-state"
 import type { KycTierState } from "./kyc-types"
 
 interface TierListProps {
@@ -28,7 +28,7 @@ export function TierList({
       {tiers.map((tier, index) => (
         <TierCard
           key={tier.id}
-          tier={tier}
+          ladder={tiers}
           index={index}
           active={tier.id === editingId}
           onEdit={() => onEdit(tier.id)}
@@ -49,17 +49,18 @@ export function TierList({
 }
 
 interface TierCardProps {
-  tier: KycTierState
+  ladder: KycTierState[]
   index: number
   active: boolean
   onEdit: () => void
   onRemove: () => void
 }
 
-function TierCard({ tier, index, active, onEdit, onRemove }: TierCardProps) {
-  const enabledReqs = KYC_REQUIREMENT_CATALOG.filter(
-    (req) => tier.reqs[req.id]?.on
-  )
+function TierCard({ ladder, index, active, onEdit, onRemove }: TierCardProps) {
+  const tier = ladder[index]
+  const inherited = inheritedChecks(ladder, index).size
+  const introduced = introducedReqIds(ladder, index).length
+  const effective = inherited + introduced
 
   return (
     <div
@@ -115,17 +116,18 @@ function TierCard({ tier, index, active, onEdit, onRemove }: TierCardProps) {
               </button>
             </div>
           </div>
-          <span className="font-mono text-xs tracking-wide text-muted-foreground">
+          <span className="mt-0.5 block font-mono text-xs tracking-wide text-muted-foreground">
             {formatNairaShort(tier.daily)} daily ·{" "}
-            {formatNairaShort(tier.balance)} max · {enabledReqs.length}{" "}
-            {enabledReqs.length === 1 ? "check" : "checks"}
+            {formatNairaShort(tier.balance)} max · {effective}{" "}
+            {effective === 1 ? "check" : "checks"}
+            {inherited > 0 ? ` (${introduced} new)` : ""}
           </span>
         </div>
       </div>
 
-      {enabledReqs.length > 0 ? (
+      {effective > 0 ? (
         <div className="mt-3 border-t border-border pt-3">
-          <TierCheckChips tier={tier} />
+          <TierCheckChips ladder={ladder} index={index} />
         </div>
       ) : null}
     </div>

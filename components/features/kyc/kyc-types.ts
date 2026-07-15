@@ -5,7 +5,10 @@ export interface RequirementState {
   provider: string | null
 }
 
-/** A user-defined verification tier. */
+/**
+ * A user-defined verification tier. Rank is the tier's position in the ladder
+ * array — T1 is index 0.
+ */
 export interface KycTierState {
   id: string
   name: string
@@ -13,6 +16,11 @@ export interface KycTierState {
   daily: number
   /** Maximum wallet balance, in naira. */
   balance: number
-  /** Requirement state keyed by catalog requirement id. */
+  /**
+   * Requirement state keyed by catalog requirement id — only the checks this
+   * tier introduces. Checks from lower tiers are inherited, derived at render
+   * time via the helpers in kyc-state.ts, so a higher tier can never require
+   * less than a lower one.
+   */
   reqs: Record<string, RequirementState>
 }

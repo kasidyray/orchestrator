@@ -170,8 +170,11 @@ export interface KycTierDefault {
   daily: number
   /** Maximum wallet balance, in naira. */
   balance: number
-  /** Requirement id → provider id for the checks enabled out of the box. */
-  enabled: Record<string, string>
+  /**
+   * Requirement id → provider id for the checks this tier introduces on top
+   * of the tiers below it. Lower tiers' checks are inherited automatically.
+   */
+  introduces: Record<string, string>
 }
 
 /** Seed tiers operators start from — they can edit, add, or remove these. */
@@ -180,15 +183,13 @@ export const KYC_SETUP_TIER_DEFAULTS: KycTierDefault[] = [
     name: "Starter",
     daily: 50_000,
     balance: 300_000,
-    enabled: { phone: "termii", bvn: "dojah" },
+    introduces: { phone: "termii", bvn: "dojah" },
   },
   {
     name: "Verified",
     daily: 1_000_000,
     balance: 5_000_000,
-    enabled: {
-      phone: "termii",
-      bvn: "dojah",
+    introduces: {
       nin: "smileid",
       id_doc: "metamap",
       liveness: "smileid",
@@ -198,14 +199,7 @@ export const KYC_SETUP_TIER_DEFAULTS: KycTierDefault[] = [
     name: "Premium",
     daily: 10_000_000,
     balance: 50_000_000,
-    enabled: {
-      phone: "termii",
-      bvn: "dojah",
-      nin: "smileid",
-      id_doc: "metamap",
-      liveness: "smileid",
-      address: "youverify",
-    },
+    introduces: { address: "youverify" },
   },
 ]
 

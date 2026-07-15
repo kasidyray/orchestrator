@@ -9,115 +9,20 @@ import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import { EmptyState } from "@/components/shared/empty-state"
 import { Spinner } from "@/components/shared/spinner"
-import { KYC_REQUIREMENT_CATALOG } from "@/lib/constants"
-import { buildReqs } from "@/components/features/kyc/kyc-state"
+import { introducedReqIds } from "@/components/features/kyc/kyc-state"
 import { TierList } from "@/components/features/kyc/tier-list"
 import { TierSheet } from "@/components/features/kyc/tier-sheet"
-import type { KycTierState } from "@/components/features/kyc/kyc-types"
+import { TierDeleteDialog } from "@/components/features/kyc/tier-delete-dialog"
+import { useTierEditor } from "@/components/features/kyc/use-tier-editor"
 import { useAppStore } from "@/store"
-
-function blankDraft(): KycTierState {
-  return { id: "", name: "", daily: 0, balance: 0, reqs: buildReqs({}) }
-}
-
-function enabledCount(tier: KycTierState): number {
-  return KYC_REQUIREMENT_CATALOG.filter((req) => tier.reqs[req.id]?.on).length
-}
 
 export function KycConfig() {
   const router = useRouter()
   const setSetupStep = useAppStore((state) => state.setSetupStep)
-
-  const [tiers, setTiers] = React.useState<KycTierState[]>([])
-  const [draft, setDraft] = React.useState<KycTierState>(blankDraft)
-  const [editingId, setEditingId] = React.useState<string | null>(null)
-  const [sheetOpen, setSheetOpen] = React.useState(false)
   const [saving, setSaving] = React.useState(false)
-  const seqRef = React.useRef(0)
 
-  function patchDraft(update: Partial<KycTierState>) {
-    setDraft((prev) => ({ ...prev, ...update }))
-  }
-
-  function toggleReq(reqId: string, on: boolean) {
-    setDraft((prev) => ({
-      ...prev,
-      reqs: { ...prev.reqs, [reqId]: { ...prev.reqs[reqId], on } },
-    }))
-  }
-
-  function setProvider(reqId: string, providerId: string) {
-    setDraft((prev) => ({
-      ...prev,
-      reqs: { ...prev.reqs, [reqId]: { on: true, provider: providerId } },
-    }))
-  }
-
-  function resetDraft() {
-    setDraft(blankDraft())
-    setEditingId(null)
-  }
-
-  function openCreate() {
-    resetDraft()
-    setSheetOpen(true)
-  }
-
-  function openEdit(id: string) {
-    const tier = tiers.find((item) => item.id === id)
-    if (!tier) return
-    setDraft({ ...tier, reqs: { ...tier.reqs } })
-    setEditingId(id)
-    setSheetOpen(true)
-  }
-
-  function handleSheetOpenChange(next: boolean) {
-    setSheetOpen(next)
-    if (!next) resetDraft()
-  }
-
-  function submitTier() {
-    const name = draft.name.trim()
-    if (!name) {
-      toast.error("Give the tier a name")
-      return
-    }
-    const enabledReqs = KYC_REQUIREMENT_CATALOG.filter(
-      (req) => draft.reqs[req.id]?.on
-    )
-    if (enabledReqs.length === 0) {
-      toast.error("Turn on at least one verification check")
-      return
-    }
-    const missing = enabledReqs.find((req) => !draft.reqs[req.id]?.provider)
-    if (missing) {
-      toast.error(`Choose a provider for ${missing.label}`)
-      return
-    }
-
-    if (editingId) {
-      setTiers((prev) =>
-        prev.map((tier) =>
-          tier.id === editingId ? { ...draft, id: editingId, name } : tier
-        )
-      )
-      toast.success("Tier updated")
-    } else {
-      seqRef.current += 1
-      setTiers((prev) => [
-        ...prev,
-        { ...draft, id: `tier-${seqRef.current}`, name },
-      ])
-      toast.success("Tier added")
-    }
-    setSheetOpen(false)
-    resetDraft()
-  }
-
-  function removeTier(id: string) {
-    setTiers((prev) => prev.filter((tier) => tier.id !== id))
-    if (editingId === id) resetDraft()
-  }
+  const editor = useTierEditor(() => [])
+  const { tiers } = editor
 
   async function handleSave() {
     setSaving(true)
@@ -128,7 +33,11 @@ export function KycConfig() {
     router.push("/dashboard")
   }
 
-  const totalChecks = tiers.reduce((sum, tier) => sum + enabledCount(tier), 0)
+  // Distinct checks across the ladder — inherited ones only count once.
+  const totalChecks = tiers.reduce(
+    (sum, _tier, index) => sum + introducedReqIds(tiers, index).length,
+    0
+  )
   const hasTiers = tiers.length > 0
 
   return (
@@ -137,19 +46,19 @@ export function KycConfig() {
         {hasTiers ? (
           <TierList
             tiers={tiers}
-            editingId={editingId}
-            onAdd={openCreate}
-            onEdit={openEdit}
-            onRemove={removeTier}
+            editingId={editor.editingId}
+            onAdd={editor.openCreate}
+            onEdit={editor.openEdit}
+            onRemove={editor.requestRemove}
           />
         ) : (
           <div className="rounded-xl border border-dashed border-border">
             <EmptyState
               icon={Shield01Icon}
               title="Set up your KYC tiers"
-              description="Add a verification tier for each level of access you offer — its checks, providers, and limits. You can add as many as you need."
+              description="Build your verification ladder from the ground up — each tier inherits the checks below it and adds its own."
               action={
-                <Button onClick={openCreate}>
+                <Button onClick={editor.openCreate}>
                   <HugeiconsIcon icon={PlusSignIcon} className="size-4" />
                   Add tier
                 </Button>
@@ -180,16 +89,26 @@ export function KycConfig() {
       ) : null}
 
       <TierSheet
-        open={sheetOpen}
-        onOpenChange={handleSheetOpenChange}
-        draft={draft}
-        editing={Boolean(editingId)}
-        onNameChange={(value) => patchDraft({ name: value })}
-        onDailyChange={(value) => patchDraft({ daily: value })}
-        onBalanceChange={(value) => patchDraft({ balance: value })}
-        onToggleReq={toggleReq}
-        onProviderChange={setProvider}
-        onSubmit={submitTier}
+        open={editor.sheetOpen}
+        onOpenChange={editor.handleSheetOpenChange}
+        draft={editor.draft}
+        editing={Boolean(editor.editingId)}
+        ladder={editor.ladder}
+        insertIndex={editor.insertIndex}
+        onInsertIndexChange={editor.setInsertIndex}
+        onNameChange={(value) => editor.patchDraft({ name: value })}
+        onDailyChange={(value) => editor.patchDraft({ daily: value })}
+        onBalanceChange={(value) => editor.patchDraft({ balance: value })}
+        onToggleReq={editor.toggleReq}
+        onProviderChange={editor.setProvider}
+        onSubmit={editor.submitTier}
+      />
+
+      <TierDeleteDialog
+        target={editor.deleteTarget}
+        tiers={tiers}
+        onCancel={editor.cancelRemove}
+        onConfirm={editor.confirmRemove}
       />
     </div>
   )

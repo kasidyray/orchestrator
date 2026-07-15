@@ -6,6 +6,13 @@ import { PlusSignIcon } from "@hugeicons/core-free-icons"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+import {
   Sheet,
   SheetClose,
   SheetContent,
@@ -15,9 +22,10 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet"
 import { KYC_REQUIREMENT_CATALOG } from "@/lib/constants"
-import { formatThousands, parseAmount } from "@/lib/utils"
+import { formatNairaShort, formatThousands, parseAmount } from "@/lib/utils"
+import { inheritedChecks } from "./kyc-state"
 import type { KycTierState } from "./kyc-types"
-import { RequirementCard } from "./requirement-card"
+import { InheritedRequirementCard, RequirementCard } from "./requirement-card"
 
 interface TierSheetProps {
   open: boolean
@@ -25,6 +33,11 @@ interface TierSheetProps {
   draft: KycTierState
   /** True when editing an existing tier rather than creating a new one. */
   editing: boolean
+  /** The tier ladder in rank order, without the draft itself. */
+  ladder: KycTierState[]
+  /** Rank position (0-based) the draft will occupy in the ladder. */
+  insertIndex: number
+  onInsertIndexChange: (index: number) => void
   onNameChange: (value: string) => void
   onDailyChange: (value: number) => void
   onBalanceChange: (value: number) => void
@@ -33,13 +46,14 @@ interface TierSheetProps {
   onSubmit: () => void
 }
 
-const TOTAL_REQUIREMENTS = KYC_REQUIREMENT_CATALOG.length
-
 export function TierSheet({
   open,
   onOpenChange,
   draft,
   editing,
+  ladder,
+  insertIndex,
+  onInsertIndexChange,
   onNameChange,
   onDailyChange,
   onBalanceChange,
@@ -47,9 +61,28 @@ export function TierSheet({
   onProviderChange,
   onSubmit,
 }: TierSheetProps) {
-  const enabled = KYC_REQUIREMENT_CATALOG.filter(
+  const inherited = inheritedChecks(ladder, insertIndex)
+  const inheritedReqs = KYC_REQUIREMENT_CATALOG.filter((req) =>
+    inherited.has(req.id)
+  )
+  const ownReqs = KYC_REQUIREMENT_CATALOG.filter(
+    (req) => !inherited.has(req.id)
+  )
+  const introducedCount = ownReqs.filter(
     (req) => draft.reqs[req.id]?.on
   ).length
+
+  const buildsOnOptions = [
+    { value: "0", label: "Nothing — this is the entry tier" },
+    ...ladder.map((tier, index) => ({
+      value: String(index + 1),
+      label: `${tier.name || "Untitled tier"} (T${index + 1})`,
+    })),
+  ]
+
+  const prev = insertIndex > 0 ? ladder[insertIndex - 1] : null
+  const next = insertIndex < ladder.length ? ladder[insertIndex] : null
+  const hasTiersAbove = insertIndex < ladder.length
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -57,7 +90,7 @@ export function TierSheet({
         <SheetHeader className="border-b border-border">
           <SheetTitle>{editing ? "Edit tier" : "Set up a tier"}</SheetTitle>
           <SheetDescription>
-            Name it, pick the checks it requires, and assign a provider to each.
+            Name it and pick the checks it adds on top of the tiers below it.
           </SheetDescription>
         </SheetHeader>
 
@@ -75,6 +108,43 @@ export function TierSheet({
             />
           </label>
 
+          <div className="mt-4 flex flex-col gap-1.5">
+            <span className="text-xs font-semibold text-muted-foreground">
+              Builds on
+            </span>
+            <Select
+              items={buildsOnOptions}
+              value={String(insertIndex)}
+              onValueChange={(value) =>
+                onInsertIndexChange(Number(value ?? 0))
+              }
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {buildsOnOptions.map((option) => (
+                  <SelectItem key={option.value} value={option.value}>
+                    {option.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <p className="text-xs text-muted-foreground">
+              Becomes T{insertIndex + 1}
+              {inherited.size > 0
+                ? ` · inherits ${inherited.size} ${
+                    inherited.size === 1 ? "check" : "checks"
+                  } from below`
+                : ""}
+              {!editing && next
+                ? ` · ${next.name || "Untitled tier"} moves up to T${
+                    insertIndex + 2
+                  }`
+                : ""}
+            </p>
+          </div>
+
           <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
             <LimitField
               label="Daily limit"
@@ -87,18 +157,71 @@ export function TierSheet({
               onChange={onBalanceChange}
             />
           </div>
+          {prev || next ? (
+            <p className="mt-1.5 text-xs text-muted-foreground">
+              {prev
+                ? `Above ${prev.name || "the tier below"} (${formatNairaShort(
+                    prev.daily
+                  )} daily · ${formatNairaShort(prev.balance)} max)`
+                : ""}
+              {prev && next ? " and " : ""}
+              {next
+                ? `${prev ? "below" : "Below"} ${
+                    next.name || "the tier above"
+                  } (${formatNairaShort(next.daily)} daily · ${formatNairaShort(
+                    next.balance
+                  )} max)`
+                : ""}
+            </p>
+          ) : null}
+
+          {inheritedReqs.length > 0 ? (
+            <>
+              <div className="mt-5 mb-2.5 flex items-center justify-between px-0.5">
+                <span className="text-[11px] font-bold tracking-wide text-muted-foreground uppercase">
+                  Inherited requirements
+                </span>
+                <span className="text-xs text-muted-foreground">
+                  {inheritedReqs.length} from lower tiers
+                </span>
+              </div>
+              <div className="flex flex-col gap-2">
+                {inheritedReqs.map((req) => {
+                  const from = inherited.get(req.id)
+                  return (
+                    <InheritedRequirementCard
+                      key={req.id}
+                      requirement={req}
+                      fromTierName={from?.tierName ?? ""}
+                      provider={from?.provider ?? null}
+                    />
+                  )
+                })}
+              </div>
+            </>
+          ) : null}
 
           <div className="mt-5 mb-2.5 flex items-center justify-between px-0.5">
             <span className="text-[11px] font-bold tracking-wide text-muted-foreground uppercase">
-              Verification requirements
+              {inheritedReqs.length > 0
+                ? "Additional checks for this tier"
+                : "Verification requirements"}
             </span>
             <span className="text-xs text-muted-foreground">
-              {enabled} of {TOTAL_REQUIREMENTS} enabled
+              {inherited.size > 0
+                ? `${inherited.size} inherited + ${introducedCount} new`
+                : `${introducedCount} of ${ownReqs.length} enabled`}
             </span>
           </div>
 
+          {hasTiersAbove ? (
+            <p className="mb-2.5 px-0.5 text-xs text-muted-foreground">
+              Checks added here flow into every tier above this one.
+            </p>
+          ) : null}
+
           <div className="flex flex-col gap-2">
-            {KYC_REQUIREMENT_CATALOG.map((req) => (
+            {ownReqs.map((req) => (
               <RequirementCard
                 key={req.id}
                 requirement={req}
