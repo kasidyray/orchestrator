@@ -17,6 +17,7 @@ import {
   type ColumnDef,
 } from "@/components/shared/DataTable/data-table"
 import { DataTableToolbar } from "@/components/shared/DataTable/data-table-toolbar"
+import { DataTableFilterCombobox } from "@/components/shared/DataTable/data-table-filter-combobox"
 import { TransactionDetailDrawer } from "@/components/features/transactions/transaction-detail-drawer"
 import { TRANSACTION_STATUS_CONFIG } from "@/lib/constants"
 import { cn, formatCurrency, formatDate } from "@/lib/utils"
@@ -219,22 +220,12 @@ export function TransactionsTable({
           </SelectContent>
         </Select>
 
-        <Select
-          items={productOptions}
+        <DataTableFilterCombobox
+          options={productOptions}
           value={product}
           onValueChange={resetTo(setProduct)}
-        >
-          <SelectTrigger size="sm">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            {productOptions.map((option) => (
-              <SelectItem key={option.value} value={option.value}>
-                {option.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+          searchPlaceholder="Search products…"
+        />
 
         <Select
           items={DATE_OPTIONS}

@@ -29,7 +29,7 @@ export function DataTableToolbar({
           value={search}
           onChange={(event) => onSearchChange(event.target.value)}
           placeholder={placeholder}
-          className="pl-8.5"
+          className="h-8 pl-8.5"
         />
       </div>
       {children ? (
