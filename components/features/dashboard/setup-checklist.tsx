@@ -181,8 +181,8 @@ function StepRow({
         className={cn(
           "grid size-9 shrink-0 place-items-center rounded-full text-sm font-semibold tabular-nums",
           isNext && !step.completed
-            ? "bg-primary/10 text-primary"
-            : "bg-muted text-muted-foreground"
+            ? "bg-primary text-primary-foreground"
+            : "border border-border bg-background text-muted-foreground"
         )}
       >
         {number}
