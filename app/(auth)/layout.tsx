@@ -1,4 +1,5 @@
 import type { ReactNode } from "react"
+import Link from "next/link"
 
 import { BrandMark } from "@/components/shared/brand-mark"
 
@@ -61,6 +62,22 @@ export default function AuthLayout({ children }: { children: ReactNode }) {
         </div>
         {children}
       </div>
+
+      <footer className="absolute inset-x-0 bottom-5 z-10 flex flex-wrap items-center justify-center gap-x-4 gap-y-1 px-6 text-xs text-muted-foreground">
+        <span>© {new Date().getFullYear()} Afrinvest Optimus</span>
+        <Link
+          href="#"
+          className="underline-offset-4 transition-colors hover:text-foreground hover:underline"
+        >
+          Privacy policy
+        </Link>
+        <Link
+          href="/docs"
+          className="underline-offset-4 transition-colors hover:text-foreground hover:underline"
+        >
+          Docs
+        </Link>
+      </footer>
     </div>
   )
 }
