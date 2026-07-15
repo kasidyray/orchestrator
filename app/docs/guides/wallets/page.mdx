@@ -1,0 +1,82 @@
+export const metadata = {
+  title: "Wallets",
+  description:
+    "Provision wallets for customers, read balances, and freeze wallets on the Optimus API.",
+}
+
+import { API_BASE_URL } from "@/lib/constants"
+
+# Wallets
+
+A **wallet** is a ledger account owned by a customer. It holds a balance in
+naira (stored in kobo), receives funding, and is the source of
+[transfers](/docs/guides/transfers).
+
+## Create a wallet
+
+<CodeBlock
+  lang="bash"
+  label="cURL"
+  code={`curl -X POST ${API_BASE_URL}/wallets \\
+  -H "Authorization: Bearer sk_live_..." \\
+  -H "Content-Type: application/json" \\
+  -d '{
+    "customer_id": "cus_xk29fmb1f93",
+    "currency": "NGN",
+    "label": "Main wallet"
+  }'`}
+/>
+
+The response includes a wallet ID (`wlt_…`) and, once provisioning completes,
+a dedicated virtual account number the customer can fund by bank transfer.
+Listen for the `wallet.created` [webhook](/docs/guides/webhooks) instead of
+polling.
+
+## Read a balance
+
+<CodeBlock
+  lang="bash"
+  label="cURL"
+  code={`curl ${API_BASE_URL}/wallets/wlt_a1b2c3d4e5/balance \\
+  -H "Authorization: Bearer sk_live_..."`}
+/>
+
+```json
+{
+  "status": true,
+  "message": "Balance retrieved",
+  "data": {
+    "wallet_id": "wlt_a1b2c3d4e5",
+    "currency": "NGN",
+    "available": 1250000,
+    "ledger": 1250000
+  }
+}
+```
+
+<Callout title="Amounts are in kobo">
+  All amounts on the API are integers in kobo: `1250000` is ₦12,500.00. Never
+  send floats — `150000` means ₦1,500.00, not ₦150,000.00.
+</Callout>
+
+`available` excludes holds and pending debits; `ledger` is the full booked
+balance. Use `available` when deciding whether a transfer can proceed.
+
+## Freeze a wallet
+
+Freeze suspicious wallets instantly — debits are blocked while credits
+continue to land:
+
+<CodeBlock
+  lang="bash"
+  label="cURL"
+  code={`curl -X POST ${API_BASE_URL}/wallets/wlt_a1b2c3d4e5/freeze \\
+  -H "Authorization: Bearer sk_live_..." \\
+  -H "Content-Type: application/json" \\
+  -d '{ "reason": "Suspicious login activity" }'`}
+/>
+
+Frozen wallets return `422` with code `wallet_frozen` on any debit attempt.
+Operators can also freeze and unfreeze from the wallet's page in the dashboard.
+
+See every endpoint in the [Wallets reference](/docs/api-reference/wallets).

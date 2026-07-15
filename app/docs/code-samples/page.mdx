@@ -1,0 +1,82 @@
+export const metadata = {
+  title: "Code samples",
+  description:
+    "Copy-paste starting points for the most common Optimus API calls.",
+}
+
+import { API_BASE_URL } from "@/lib/constants"
+
+# Code samples
+
+Working starting points for the most common calls. Every sample assumes your
+secret key lives in the `OPTIMUS_SECRET_KEY` environment variable — see
+[Authentication](/docs/authentication).
+
+## Create a customer
+
+<CodeTabs labels={["cURL", "JavaScript"]}>
+  <CodeBlock
+    lang="bash"
+    label="cURL"
+    code={`curl -X POST ${API_BASE_URL}/customers \\
+  -H "Authorization: Bearer sk_live_..." \\
+  -H "Content-Type: application/json" \\
+  -d '{
+    "first_name": "Adaeze",
+    "last_name": "Okonkwo",
+    "email": "adaeze@example.com",
+    "phone": "+2348032214590"
+  }'`}
+  />
+  <CodeBlock
+    lang="javascript"
+    label="JavaScript"
+    code={`const res = await fetch("${API_BASE_URL}/customers", {
+  method: "POST",
+  headers: {
+    Authorization: \`Bearer \${process.env.OPTIMUS_SECRET_KEY}\`,
+    "Content-Type": "application/json",
+  },
+  body: JSON.stringify({
+    first_name: "Adaeze",
+    last_name: "Okonkwo",
+    email: "adaeze@example.com",
+  }),
+})
+
+const customer = await res.json()`}
+  />
+</CodeTabs>
+
+## Initiate a transfer
+
+<CodeBlock
+  lang="bash"
+  label="cURL"
+  code={`curl -X POST ${API_BASE_URL}/transactions/transfer \\
+  -H "Authorization: Bearer sk_live_..." \\
+  -H "Content-Type: application/json" \\
+  -d '{
+    "wallet_id": "wlt_a1b2c3d4e5",
+    "amount": 150000,
+    "narration": "Vendor payout"
+  }'`}
+/>
+
+## Verify a webhook signature
+
+```javascript
+import { createHmac } from "crypto"
+
+function verifySignature(payload, signature, secret) {
+  const expected = createHmac("sha256", secret)
+    .update(payload)
+    .digest("hex")
+  return signature === expected
+}
+```
+
+<Callout title="Want a typed client?">
+  The [Node.js and Python SDKs](/docs/sdks) wrap these calls with typed
+  methods, retries, and idempotency keys built in.
+</Callout>

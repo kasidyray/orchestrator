@@ -1,0 +1,48 @@
+export const metadata = {
+  title: "Environments & test mode",
+  description:
+    "How the Optimus sandbox and live environments work, and how to go live.",
+}
+
+import { API_BASE_URL, API_SANDBOX_BASE_URL } from "@/lib/constants"
+
+# Environments & test mode
+
+Optimus runs two fully separate environments. They share nothing — customers,
+wallets, transactions, and API keys created in one do not exist in the other.
+
+<div className="my-4 flex flex-col gap-3">
+  <BaseUrlCard label="Sandbox base URL" url={API_SANDBOX_BASE_URL} />
+  <BaseUrlCard label="Live base URL" url={API_BASE_URL} />
+</div>
+
+## Sandbox
+
+The sandbox is where you build. It accepts only `sk_test_…` keys and simulates
+the full product surface — KYC checks, transfers, webhooks — without moving
+real money. Data volumes and identifiers behave exactly like production, so an
+integration that works in the sandbox works live.
+
+Use it to:
+
+- develop and test your integration end to end,
+- simulate failure cases (failed transfers, rejected KYC) safely,
+- demo your product without touching real accounts.
+
+## Live
+
+The live environment accepts only `sk_live_…` keys and moves real money. It is
+locked until your business completes onboarding — the dashboard shows a
+**Live (locked)** badge until then.
+
+## Test mode in the dashboard
+
+The dashboard mirrors the same split: the environment switch in the top bar
+flips every screen between sandbox and live data. When you're in test mode, a
+strip across the top reminds you that nothing on screen is real.
+
+<Callout title="Going live">
+  Complete onboarding (business details, KYC, settlement account) from the
+  dashboard, then use the go-live switch in the top bar. Your sandbox
+  integration carries over — you only change the base URL and the key.
+</Callout>

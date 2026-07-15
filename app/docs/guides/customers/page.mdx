@@ -1,0 +1,117 @@
+export const metadata = {
+  title: "Customers & KYC",
+  description:
+    "Create customers on the Optimus API and verify their identity with tiered KYC.",
+}
+
+import { API_BASE_URL } from "@/lib/constants"
+
+# Customers & KYC
+
+A **customer** is the person your product serves — every wallet, transaction,
+and investment hangs off one. Create the customer first, verify their identity,
+then provision their [wallet](/docs/guides/wallets).
+
+## Create a customer
+
+<CodeTabs labels={["cURL", "JavaScript"]}>
+  <CodeBlock
+    lang="bash"
+    label="cURL"
+    code={`curl -X POST ${API_BASE_URL}/customers \\
+  -H "Authorization: Bearer sk_live_..." \\
+  -H "Content-Type: application/json" \\
+  -d '{
+    "first_name": "Adaeze",
+    "last_name": "Okonkwo",
+    "email": "adaeze@example.com",
+    "phone": "+2348032214590"
+  }'`}
+  />
+  <CodeBlock
+    lang="javascript"
+    label="JavaScript"
+    code={`const res = await fetch("${API_BASE_URL}/customers", {
+  method: "POST",
+  headers: {
+    Authorization: \`Bearer \${process.env.OPTIMUS_SECRET_KEY}\`,
+    "Content-Type": "application/json",
+  },
+  body: JSON.stringify({
+    first_name: "Adaeze",
+    last_name: "Okonkwo",
+    email: "adaeze@example.com",
+  }),
+})
+
+const customer = await res.json()`}
+  />
+</CodeTabs>
+
+<ParamTable
+  rows={[
+    {
+      name: "first_name",
+      type: "string",
+      required: true,
+      description: "The customer's legal first name, as it appears on their ID.",
+    },
+    {
+      name: "last_name",
+      type: "string",
+      required: true,
+      description: "The customer's legal last name.",
+    },
+    {
+      name: "email",
+      type: "string",
+      required: true,
+      description: "Unique per customer within your business.",
+    },
+    {
+      name: "phone",
+      type: "string",
+      description: "E.164 format, e.g. +2348032214590.",
+    },
+  ]}
+/>
+
+The response includes a customer ID (`cus_…`). Store it — every subsequent
+call about this person uses it.
+
+## Verify identity (KYC)
+
+New customers start at the lowest KYC tier with tight transaction limits.
+Submit identity documents to move them up:
+
+<CodeBlock
+  lang="bash"
+  label="cURL"
+  code={`curl -X POST ${API_BASE_URL}/customers/{id}/kyc \\
+  -H "Authorization: Bearer sk_live_..." \\
+  -H "Content-Type: application/json" \\
+  -d '{
+    "bvn": "22212345678",
+    "id_type": "nin",
+    "id_number": "70123456789"
+  }'`}
+/>
+
+Verification runs asynchronously. Poll
+`GET /kyc/verifications/{id}` or — better — listen for the
+`customer.kyc_approved` [webhook](/docs/guides/webhooks).
+
+## Tiers and limits
+
+Tier configuration (limits per tier, documents required) is yours to define
+per product. Fetch the current configuration with `GET /kyc/tiers`, and manage
+it from the dashboard under **Manage → Configuration**.
+
+<Callout title="Wallets before KYC">
+  You can create a wallet for an unverified customer, but it stays capped at
+  tier-one limits until KYC passes. Design your onboarding so identity
+  verification runs while the customer explores the product.
+</Callout>
+
+See every endpoint in the [Customers](/docs/api-reference/customers) and
+[KYC](/docs/api-reference/kyc) references.

@@ -1,0 +1,90 @@
+export const metadata = {
+  title: "Webhooks",
+  description:
+    "Receive real-time Optimus events, verify signatures, and handle retries.",
+}
+
+import { WEBHOOK_EVENTS } from "@/lib/constants"
+
+# Webhooks
+
+Optimus POSTs a signed JSON payload to your endpoint whenever something
+happens — a transfer settles, a KYC check passes, a wallet is provisioned.
+Webhooks are how your integration learns about asynchronous outcomes; never
+poll for state you can receive as an event.
+
+## Set up an endpoint
+
+Register an HTTPS URL from **Manage → Webhooks** in the dashboard. The URL
+must respond to a `POST` with a `2xx` within 10 seconds — do your heavy
+processing after acknowledging, not before.
+
+## Event catalog
+
+<table className="my-4 w-full text-sm">
+  <thead className="bg-muted/50">
+    <tr>
+      <th className="px-3 py-2 text-left font-medium text-muted-foreground">Event</th>
+      <th className="px-3 py-2 text-left font-medium text-muted-foreground">Fires when</th>
+    </tr>
+  </thead>
+  <tbody className="divide-y divide-border">
+    {WEBHOOK_EVENTS.map((item) => (
+      <tr key={item.event}>
+        <td className="px-3 py-2 align-top">
+          <code className="rounded bg-muted px-1.5 py-0.5 font-mono text-xs text-foreground">
+            {item.event}
+          </code>
+        </td>
+        <td className="px-3 py-2 align-top text-muted-foreground">
+          {item.description}
+        </td>
+      </tr>
+    ))}
+  </tbody>
+</table>
+
+## Payload shape
+
+```json
+{
+  "event": "transaction.successful",
+  "created_at": "2026-07-14T09:12:44Z",
+  "data": {
+    "id": "txn_9f8e7d6c5b",
+    "wallet_id": "wlt_a1b2c3d4e5",
+    "amount": 150000,
+    "status": "successful"
+  }
+}
+```
+
+## Verify signatures
+
+Every delivery carries an `X-Optimus-Signature` header — an HMAC SHA-256 of
+the raw request body, keyed with your signing secret (shown once when you
+create the endpoint). Reject anything that doesn't match:
+
+```javascript
+import { createHmac } from "crypto"
+
+function verifySignature(payload, signature, secret) {
+  const expected = createHmac("sha256", secret)
+    .update(payload)
+    .digest("hex")
+  return signature === expected
+}
+```
+
+<Callout variant="danger" title="Verify before you trust">
+  An unverified webhook endpoint will happily accept forged events. Always
+  compute the HMAC over the raw body (before any JSON parsing) and compare it
+  to the header — reject the request with 401 on mismatch.
+</Callout>
+
+## Retries and idempotency
+
+Failed deliveries (non-`2xx` or timeout) are retried with exponential backoff
+for up to 24 hours. Because retries mean duplicates, make your handler
+idempotent — track processed event IDs and skip ones you've already seen.
+Delivery history and manual redelivery live in **Manage → Webhooks**.

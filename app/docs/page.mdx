@@ -1,0 +1,66 @@
+{/* Full title: the layout's title.template only applies to child segments,
+    and this page shares the layout's segment. */}
+
+export const metadata = {
+  title: "Introduction — Optimus docs",
+  description:
+    "What the Optimus API is, how it's organised, and how to make your first request.",
+}
+
+import { API_BASE_URL, API_SANDBOX_BASE_URL } from "@/lib/constants"
+
+# Introduction
+
+The Optimus API is a single REST API for **customers, wallets, KYC,
+transactions, and investments**. You use it to launch branded wallet and
+savings products for your customers — Optimus handles the ledger, compliance
+checks, and money movement underneath.
+
+All requests are made over HTTPS, authenticated with a secret key, and return
+JSON. Request and response bodies use `snake_case` field names.
+
+## Base URLs
+
+Every endpoint in the [API reference](/docs/api-reference) is relative to one
+of two base URLs:
+
+<div className="my-4 flex flex-col gap-3">
+  <BaseUrlCard label="Live base URL" url={API_BASE_URL} />
+  <BaseUrlCard label="Sandbox base URL" url={API_SANDBOX_BASE_URL} />
+</div>
+
+<Callout title="Start in the sandbox">
+  The sandbox is a full replica of the live environment where no real money
+  moves. Build and test there with a test key, then switch base URL and key to
+  go live. See [Environments & test mode](/docs/environments).
+</Callout>
+
+## Make your first request
+
+Grab a test secret key from [API keys](/api-keys) in the dashboard, then list
+your customers:
+
+<CodeBlock
+  lang="bash"
+  label="cURL"
+  code={`curl ${API_SANDBOX_BASE_URL}/customers \\
+  -H "Authorization: Bearer sk_test_your_secret_key"`}
+/>
+
+A successful response returns `200 OK` with a JSON body:
+
+```json
+{
+  "status": true,
+  "message": "Customers retrieved",
+  "data": [],
+  "meta": { "page": 1, "per_page": 25, "total": 0 }
+}
+```
+
+## Where to go next
+
+- [Authentication](/docs/authentication) — how secret keys work and how to keep them safe.
+- [Customers & KYC](/docs/guides/customers) — create your first customer and verify their identity.
+- [Wallets](/docs/guides/wallets) — provision wallets and move money.
+- [Webhooks](/docs/guides/webhooks) — get notified when things happen.

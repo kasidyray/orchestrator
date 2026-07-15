@@ -212,6 +212,7 @@ app/
   (auth)/            login, register, verify-email      ← centered, no shell
   (dashboard)/       layout.tsx (AppShell) + dashboard, customers/[id],
                      transactions, developer, settings
+  docs/              PUBLIC standalone developer docs (own layout, no auth)
   setup/             layout.tsx + organisation, kyc, wallets, webhooks, api-keys
   layout.tsx         root (fonts) → <Providers>
   globals.css        all tokens (DO NOT restructure; additive only)
@@ -221,11 +222,28 @@ components/
                      EmptyState, PageHeader, SectionCard, CopyButton
   features/          feature-specific: auth/ dashboard/ customers/ transactions/
                      setup/ developer/ settings/
-lib/                 mock-data.ts · types.ts · constants.ts · utils.ts
+  docs/              docs-only: layout shell, MDX registry, CodeBlock (shiki)
+lib/                 mock-data.ts · types.ts · constants.ts · utils.ts ·
+                     docs-nav.ts · shiki.ts
 store/               index.ts (Zustand)
 providers/           index.tsx (Theme + QueryClient + toploader + Toaster)
 hooks/               use-environment.ts, etc.
 ```
+
+### Developer docs area (`/docs`)
+
+Standalone public MDX docs (Paystack-style) under `app/docs/`. **Before
+editing anything docs-related, read `docs/MAINTAINING-DOCS.md`** — it has the
+cookbook (add a page, add an endpoint, add an MDX component) and the
+constraints. The two that bite:
+
+- Turbopack only accepts **string-named** remark/rehype plugins in
+  `next.config.ts`; syntax highlighting therefore lives in the
+  `DocsCodeBlock` RSC (shiki), never a rehype plugin.
+- The API reference, webhook catalog, and SDK list render from
+  `lib/constants.ts` (`API_ENDPOINTS`, `WEBHOOK_EVENTS`, `SDK_DOWNLOADS`) —
+  update the data, never duplicate it as prose. Sidebar + pager order live in
+  `lib/docs-nav.ts`.
 
 ### Component rules
 - **Named exports only** (except `page.tsx`, which is default).

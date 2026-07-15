@@ -1,0 +1,53 @@
+export const metadata = {
+  title: "Authentication",
+  description:
+    "Authenticate Optimus API requests with secret keys, and keep them safe.",
+}
+
+import { API_BASE_URL, API_SANDBOX_BASE_URL } from "@/lib/constants"
+
+# Authentication
+
+Every request to the Optimus API is authenticated with a **secret key**,
+passed as a bearer token in the `Authorization` header:
+
+<CodeBlock
+  lang="bash"
+  label="cURL"
+  code={`curl ${API_BASE_URL}/customers \\
+  -H "Authorization: Bearer sk_live_your_secret_key"`}
+/>
+
+Requests without a valid key return `401 Unauthorized`. Keys carry the full
+permissions of your business — treat them like passwords.
+
+## Test and live keys
+
+Keys come in two flavours, matched to the two [environments](/docs/environments):
+
+| Prefix | Environment | Use against |
+| --- | --- | --- |
+| `sk_test_…` | Sandbox | <code>{API_SANDBOX_BASE_URL}</code> |
+| `sk_live_…` | Live | <code>{API_BASE_URL}</code> |
+
+A test key can never move real money, and a live key is rejected by the
+sandbox. If you get `401` errors that you can't explain, check that the key
+prefix matches the base URL you're calling.
+
+## Managing keys
+
+Create, roll, and revoke keys from the [API keys](/api-keys) page in the
+dashboard. Each key shows its last-used time, so stale keys are easy to spot
+and revoke.
+
+<Callout variant="warning" title="Keep secret keys server-side">
+  Never embed a secret key in client-side code, mobile apps, or public
+  repositories. Store it in an environment variable (for example
+  `OPTIMUS_SECRET_KEY`) and make all API calls from your backend.
+</Callout>
+
+## Rolling a compromised key
+
+If a key leaks, revoke it immediately from [API keys](/api-keys) and create a
+replacement. Revocation is instant: requests signed with the old key start
+failing with `401` as soon as you confirm.

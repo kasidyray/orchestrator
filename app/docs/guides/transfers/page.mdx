@@ -1,0 +1,89 @@
+export const metadata = {
+  title: "Transfers",
+  description:
+    "Move money out of wallets, track transaction state, and reverse mistakes.",
+}
+
+import { API_BASE_URL } from "@/lib/constants"
+
+# Transfers
+
+A **transfer** debits a wallet and pays out to a bank account or another
+wallet. Transfers are asynchronous: the API accepts the instruction, then the
+transaction moves through `pending → successful` (or `failed`).
+
+## Initiate a transfer
+
+<CodeBlock
+  lang="bash"
+  label="cURL"
+  code={`curl -X POST ${API_BASE_URL}/transactions/transfer \\
+  -H "Authorization: Bearer sk_live_..." \\
+  -H "Content-Type: application/json" \\
+  -d '{
+    "wallet_id": "wlt_a1b2c3d4e5",
+    "amount": 150000,
+    "narration": "Vendor payout"
+  }'`}
+/>
+
+<ParamTable
+  rows={[
+    {
+      name: "wallet_id",
+      type: "string",
+      required: true,
+      description: "The wallet to debit.",
+    },
+    {
+      name: "amount",
+      type: "integer",
+      required: true,
+      description: "Amount in kobo — 150000 is ₦1,500.00.",
+    },
+    {
+      name: "narration",
+      type: "string",
+      description: "Appears on the recipient's statement and in the dashboard.",
+    },
+  ]}
+/>
+
+The response returns a transaction ID (`txn_…`) with status `pending`. Don't
+treat a `2xx` here as money delivered — wait for the
+`transaction.successful` or `transaction.failed`
+[webhook](/docs/guides/webhooks).
+
+## Track and list transactions
+
+Fetch one transaction with `GET /transactions/{id}`, or list with filters:
+
+<CodeBlock
+  lang="bash"
+  label="cURL"
+  code={`curl "${API_BASE_URL}/transactions?status=failed&from=2026-07-01" \\
+  -H "Authorization: Bearer sk_live_..."`}
+/>
+
+## Reverse a transaction
+
+Reversal returns a successful transaction's funds to the source wallet:
+
+<CodeBlock
+  lang="bash"
+  label="cURL"
+  code={`curl -X POST ${API_BASE_URL}/transactions/txn_9f8e7d6c5b/reverse \\
+  -H "Authorization: Bearer sk_live_..."`}
+/>
+
+Reversing an already-reversed transaction returns `409 Conflict`. A
+`transaction.reversed` webhook fires when the reversal settles.
+
+<Callout variant="warning" title="Insufficient balance">
+  A transfer larger than the wallet's available balance fails immediately with
+  `422` and code `insufficient_balance`. Check the balance first, or handle
+  the error and show the customer a clear message.
+</Callout>
+
+See every endpoint in the
+[Transactions reference](/docs/api-reference/transactions).

@@ -83,7 +83,7 @@ export function TopBar() {
           size="sm"
           className="hidden text-muted-foreground sm:inline-flex"
           nativeButton={false}
-          render={<Link href="/developer" />}
+          render={<Link href="/docs" target="_blank" rel="noopener" />}
         >
           <HugeiconsIcon icon={BookOpen01Icon} />
           Docs
